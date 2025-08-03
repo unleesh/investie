@@ -1,0 +1,33 @@
+{
+  "fearGreedIndex": { 
+    "value": 38, 
+    "status": "fear", 
+    "source": "claude_search" 
+  },
+  "vix": { 
+    "value": 17.5, 
+    "status": "medium", 
+    "source": "google_finance" 
+  },
+  "interestRate": { 
+    "value": 5.33, 
+    "aiOutlook": "Fed rate expected to hold steady through the next quarter amid persistent inflation concerns.", 
+    "source": "fred_api" 
+  },
+  "cpi": { 
+    "value": 3.4, 
+    "monthOverMonth": 0.1, 
+    "direction": "up", 
+    "source": "fred_api" 
+  },
+  "unemploymentRate": { 
+    "value": 3.9, 
+    "monthOverMonth": 0.1, 
+    "source": "fred_api" 
+  },
+  "sp500Sparkline": { 
+    "data": [4780, 4785, 4790, 4770, 4795, 4805, 4800], 
+    "weeklyTrend": "up", 
+    "source": "google_finance" 
+  }
+}

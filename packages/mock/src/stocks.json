@@ -1,0 +1,532 @@
+{
+  "AAPL": {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "price": { 
+      "current": 195.89, 
+      "change": 2.34, 
+      "changePercent": 1.21,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 192.45 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 193.21 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 191.78 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 194.12 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 193.55 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 195.89 }
+      ],
+      "trend": "up",
+      "change": 3.44,
+      "changePercent": 1.79,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 28.5, 
+      "marketCap": 3050000000000, 
+      "volume": 45680000, 
+      "fiftyTwoWeekHigh": 199.62, 
+      "fiftyTwoWeekLow": 164.08,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 62, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "Apple maintains strong fundamentals with robust ecosystem growth and Services revenue expansion. Vision Pro represents significant innovation catalyst despite initial supply constraints. iPhone demand stabilizing with upgrade cycle momentum building for Q2.",
+      "rating": "bullish",
+      "confidence": 85,
+      "keyFactors": ["Services revenue growth", "Vision Pro market potential", "iPhone upgrade cycle", "Strong cash position"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T10:30:00Z"
+    },
+    "newsSummary": { 
+      "headline": "Analysts remain bullish on Vision Pro sales projections despite initial supply chain concerns.", 
+      "sentiment": "positive",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Technology", 
+      "weeklyChange": 2.1,
+      "source": "google_finance"
+    }
+  },
+  "TSLA": {
+    "symbol": "TSLA",
+    "name": "Tesla, Inc.",
+    "price": { 
+      "current": 248.67, 
+      "change": -3.42, 
+      "changePercent": -1.36,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 252.09 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 250.45 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 255.12 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 251.78 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 249.33 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 248.67 }
+      ],
+      "trend": "down",
+      "change": -3.42,
+      "changePercent": -1.36,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 45.2, 
+      "marketCap": 790000000000, 
+      "volume": 52300000, 
+      "fiftyTwoWeekHigh": 299.29, 
+      "fiftyTwoWeekLow": 138.80,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 58, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "Tesla faces production challenges but maintains strong EV market position. Cybertruck ramp-up progressing despite delays. Autonomous driving capabilities remain key long-term catalyst for valuation premium.",
+      "rating": "neutral",
+      "confidence": 72,
+      "keyFactors": ["EV market competition", "Production scaling", "Autonomous driving progress", "Energy storage growth"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T10:35:00Z"
+    },
+    "newsSummary": { 
+      "headline": "Tesla deliveries beat expectations despite production challenges.", 
+      "sentiment": "positive",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Consumer Cyclical", 
+      "weeklyChange": -0.8,
+      "source": "google_finance"
+    }
+  },
+  "MSFT": {
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation",
+    "price": { 
+      "current": 424.73, 
+      "change": 5.21, 
+      "changePercent": 1.24,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 419.52 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 421.89 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 418.34 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 422.67 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 420.15 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 424.73 }
+      ],
+      "trend": "up",
+      "change": 5.21,
+      "changePercent": 1.24,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 32.1, 
+      "marketCap": 3150000000000, 
+      "volume": 18900000, 
+      "fiftyTwoWeekHigh": 468.35, 
+      "fiftyTwoWeekLow": 362.90,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 65, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "Microsoft's Azure cloud dominance continues with accelerating growth in AI services. Office 365 Copilot adoption exceeds expectations, driving substantial revenue expansion. Strong enterprise positioning provides competitive moat against cloud rivals.",
+      "rating": "bullish",
+      "confidence": 88,
+      "keyFactors": ["Azure AI services growth", "Copilot enterprise adoption", "Cloud market leadership", "Recurring subscription revenue"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T10:40:00Z"
+    },
+    "newsSummary": { 
+      "headline": "Azure cloud revenue growth accelerates in Q4.", 
+      "sentiment": "positive",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Technology", 
+      "weeklyChange": 2.1,
+      "source": "google_finance"
+    }
+  },
+  "GOOGL": {
+    "symbol": "GOOGL",
+    "name": "Alphabet Inc.",
+    "price": { 
+      "current": 171.48, 
+      "change": 1.89, 
+      "changePercent": 1.11,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 169.59 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 170.23 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 168.78 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 172.11 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 170.84 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 171.48 }
+      ],
+      "trend": "up",
+      "change": 1.89,
+      "changePercent": 1.11,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 24.8, 
+      "marketCap": 2100000000000, 
+      "volume": 23400000, 
+      "fiftyTwoWeekHigh": 193.31, 
+      "fiftyTwoWeekLow": 129.40,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 59, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "Google's Gemini AI rollout gaining momentum with significant Search integration improvements. YouTube advertising recovery strengthens alongside cloud computing growth. Regulatory headwinds remain a concern but operational performance solid.",
+      "rating": "neutral",
+      "confidence": 76,
+      "keyFactors": ["Gemini AI integration", "YouTube ad recovery", "Cloud growth trajectory", "Regulatory uncertainty"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T10:45:00Z"
+    },
+    "newsSummary": { 
+      "headline": "Google AI investments show promising early returns.", 
+      "sentiment": "positive",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Communication Services", 
+      "weeklyChange": 1.5,
+      "source": "google_finance"
+    }
+  },
+  "AMZN": {
+    "symbol": "AMZN",
+    "name": "Amazon.com, Inc.",
+    "price": { 
+      "current": 184.32, 
+      "change": -1.67, 
+      "changePercent": -0.90,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 185.99 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 188.45 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 186.23 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 187.78 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 185.12 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 184.32 }
+      ],
+      "trend": "down",
+      "change": -1.67,
+      "changePercent": -0.90,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 41.5, 
+      "marketCap": 1900000000000, 
+      "volume": 31200000, 
+      "fiftyTwoWeekHigh": 201.20, 
+      "fiftyTwoWeekLow": 139.52,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 52, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "Amazon's AWS maintains market leadership despite intensifying competition from Microsoft and Google. Prime membership growth stabilizing while retail margins face pressure from fulfillment costs. Advertising business shows strong momentum.",
+      "rating": "neutral",
+      "confidence": 78,
+      "keyFactors": ["AWS competitive positioning", "Retail margin pressure", "Prime membership trends", "Advertising revenue growth"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T10:50:00Z"
+    },
+    "newsSummary": { 
+      "headline": "AWS growth remains strong despite increased competition.", 
+      "sentiment": "neutral",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Consumer Cyclical", 
+      "weeklyChange": -0.8,
+      "source": "google_finance"
+    }
+  },
+  "NVDA": {
+    "symbol": "NVDA",
+    "name": "NVIDIA Corporation",
+    "price": { 
+      "current": 878.34, 
+      "change": 12.45, 
+      "changePercent": 1.44,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 865.89 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 872.15 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 869.23 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 875.78 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 871.45 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 878.34 }
+      ],
+      "trend": "up",
+      "change": 12.45,
+      "changePercent": 1.44,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 65.2, 
+      "marketCap": 2150000000000, 
+      "volume": 42100000, 
+      "fiftyTwoWeekHigh": 974.00, 
+      "fiftyTwoWeekLow": 543.02,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 68, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "NVIDIA dominates AI chip market with H100 and upcoming H200 driving unprecedented data center demand. Gaming recovery underway while automotive and professional visualization segments stabilize. Supply chain constraints easing gradually.",
+      "rating": "bullish",
+      "confidence": 90,
+      "keyFactors": ["AI chip market leadership", "Data center demand surge", "Gaming segment recovery", "Next-gen architecture pipeline"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T10:55:00Z"
+    },
+    "newsSummary": { 
+      "headline": "AI chip demand continues to drive record revenues.", 
+      "sentiment": "positive",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Technology", 
+      "weeklyChange": 2.1,
+      "source": "google_finance"
+    }
+  },
+  "META": {
+    "symbol": "META",
+    "name": "Meta Platforms, Inc.",
+    "price": { 
+      "current": 512.78, 
+      "change": 8.92, 
+      "changePercent": 1.77,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 503.86 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 507.23 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 505.45 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 509.12 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 506.89 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 512.78 }
+      ],
+      "trend": "up",
+      "change": 8.92,
+      "changePercent": 1.77,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 23.4, 
+      "marketCap": 1300000000000, 
+      "volume": 15800000, 
+      "fiftyTwoWeekHigh": 542.81, 
+      "fiftyTwoWeekLow": 279.49,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 61, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "Meta's Reality Labs showing improved user engagement with Quest 3 driving VR adoption. Instagram and Facebook advertising revenue stabilizing despite TikTok competition. AI-powered content recommendations enhancing user retention significantly.",
+      "rating": "bullish",
+      "confidence": 82,
+      "keyFactors": ["VR/AR market expansion", "Social media ad recovery", "AI content optimization", "Quest 3 adoption rates"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T11:00:00Z"
+    },
+    "newsSummary": { 
+      "headline": "Metaverse investments begin showing user engagement gains.", 
+      "sentiment": "positive",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Communication Services", 
+      "weeklyChange": 1.5,
+      "source": "google_finance"
+    }
+  },
+  "NFLX": {
+    "symbol": "NFLX",
+    "name": "Netflix, Inc.",
+    "price": { 
+      "current": 692.12, 
+      "change": -4.23, 
+      "changePercent": -0.61,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 696.35 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 698.78 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 694.23 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 695.89 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 697.45 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 692.12 }
+      ],
+      "trend": "down",
+      "change": -4.23,
+      "changePercent": -0.61,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 34.7, 
+      "marketCap": 298000000000, 
+      "volume": 2800000, 
+      "fiftyTwoWeekHigh": 721.00, 
+      "fiftyTwoWeekLow": 445.73,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 48, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "Netflix faces subscriber saturation in mature markets but ad-supported tier gaining traction. Content spending optimization improving margins while gaming initiatives show early promise. International expansion remains key growth driver.",
+      "rating": "neutral",
+      "confidence": 74,
+      "keyFactors": ["Ad-tier subscriber growth", "Content cost optimization", "Gaming platform development", "International market penetration"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T11:05:00Z"
+    },
+    "newsSummary": { 
+      "headline": "Subscriber growth slows but ad-tier adoption accelerates.", 
+      "sentiment": "neutral",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Communication Services", 
+      "weeklyChange": 1.5,
+      "source": "google_finance"
+    }
+  },
+  "AVGO": {
+    "symbol": "AVGO",
+    "name": "Broadcom Inc.",
+    "price": { 
+      "current": 1432.67, 
+      "change": 18.92, 
+      "changePercent": 1.34,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 1413.75 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 1418.23 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 1425.89 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 1429.45 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 1427.12 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 1432.67 }
+      ],
+      "trend": "up",
+      "change": 18.92,
+      "changePercent": 1.34,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 28.9, 
+      "marketCap": 665000000000, 
+      "volume": 1900000, 
+      "fiftyTwoWeekHigh": 1475.00, 
+      "fiftyTwoWeekLow": 1018.48,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 63, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "Broadcom benefits from AI infrastructure buildout with strong data center networking demand. VMware acquisition integration proceeding smoothly, expanding software revenue streams. Semiconductor cycle recovery supporting wireless and industrial segments.",
+      "rating": "bullish",
+      "confidence": 83,
+      "keyFactors": ["AI infrastructure demand", "VMware integration success", "Data center networking growth", "Semiconductor cycle recovery"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T11:10:00Z"
+    },
+    "newsSummary": { 
+      "headline": "Semiconductor demand drives strong quarterly results.", 
+      "sentiment": "positive",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Technology", 
+      "weeklyChange": 2.1,
+      "source": "google_finance"
+    }
+  },
+  "AMD": {
+    "symbol": "AMD",
+    "name": "Advanced Micro Devices, Inc.",
+    "price": { 
+      "current": 142.58, 
+      "change": 2.17, 
+      "changePercent": 1.54,
+      "source": "google_finance"
+    },
+    "priceChart": {
+      "period": "1W",
+      "data": [
+        { "timestamp": "2025-01-27T16:00:00Z", "price": 140.41 },
+        { "timestamp": "2025-01-28T16:00:00Z", "price": 141.23 },
+        { "timestamp": "2025-01-29T16:00:00Z", "price": 139.87 },
+        { "timestamp": "2025-01-30T16:00:00Z", "price": 141.78 },
+        { "timestamp": "2025-01-31T16:00:00Z", "price": 140.95 },
+        { "timestamp": "2025-02-03T16:00:00Z", "price": 142.58 }
+      ],
+      "trend": "up",
+      "change": 2.17,
+      "changePercent": 1.54,
+      "source": "google_finance"
+    },
+    "fundamentals": { 
+      "pe": 52.3, 
+      "marketCap": 230000000000, 
+      "volume": 28400000, 
+      "fiftyTwoWeekHigh": 227.30, 
+      "fiftyTwoWeekLow": 139.03,
+      "source": "google_finance"
+    },
+    "technicals": { "rsi": 55, "rsiStatus": "neutral" },
+    "aiEvaluation": {
+      "summary": "AMD's EPYC processors gaining data center market share while Instinct AI accelerators challenge NVIDIA's dominance. Gaming GPU segment under pressure but showing signs of stabilization. Strong CPU roadmap maintains competitive positioning.",
+      "rating": "neutral",
+      "confidence": 79,
+      "keyFactors": ["Data center CPU market share", "AI accelerator competition", "Gaming GPU stabilization", "Process technology advancement"],
+      "timeframe": "3M",
+      "source": "claude_ai",
+      "lastUpdated": "2025-02-03T11:15:00Z"
+    },
+    "newsSummary": { 
+      "headline": "AI chip competition with NVIDIA intensifies in data center market.", 
+      "sentiment": "neutral",
+      "source": "google_news + claude_ai"
+    },
+    "sectorPerformance": { 
+      "name": "Technology", 
+      "weeklyChange": 2.1,
+      "source": "google_finance"
+    }
+  }
+}

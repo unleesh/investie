@@ -32,7 +32,8 @@ investie/
 │   └── utils/         # 공유 헬퍼 함수 (빈 껍데기)
 ├── scripts/
 │   └── mock-server.ts # 옵션: 목업 JSON을 제공하는 간단한 서버
-└── package.json
+
+
 2단계: 공유 타입 정의 (packages/types)
 모든 데이터 구조의 "단일 진실 공급원(single source of truth)"을 만듭니다. 이것은 프론트엔드와 백엔드 간의 계약입니다.
 
@@ -229,6 +230,8 @@ export interface Watchlist {
   maxItems: number; // 최대 종목 수 (기본 10개)
   lastUpdated: string;
 }
+
+
 3단계: 목업 데이터 생성 (packages/mock)
 위에서 정의한 타입을 기반으로 JSON 파일을 생성합니다.
 
@@ -330,6 +333,8 @@ JSON
   }
   // ... 기본 10개 주식(MSFT, GOOGL, AMZN 등)에 대한 목업 데이터 추가
 }
+
+
 4단계: 애플리케이션 뼈대(스켈레톤) 구성
 비어 있지만 컴파일 가능한 컴포넌트와 서비스를 만듭니다.
 
@@ -378,6 +383,8 @@ export class MarketService {
     return mockData;
   }
 }
+
+
 5단계: 스크립트 설정 (package.json)
 루트 package.json에 모든 앱을 동시에 실행하는 스크립트를 설정합니다.
 
@@ -408,6 +415,7 @@ JSON
 [ ] 백엔드 엔드포인트 /api/v1/market-summary가 목업 JSON 데이터를 반환합니다.
 
 [ ] 네 명의 모든 개발자가 레포지토리를 클론하고 npm run dev를 성공적으로 실행했습니다.
+
 
 📋 Phase 1: 모듈식 개발 (4인 팀 담당)
 기반이 마련되었으므로, 이제 팀은 병렬 개발을 시작할 수 있습니다. 각 단계는 하나의 기능 단위(feature slice)에 집중합니다.

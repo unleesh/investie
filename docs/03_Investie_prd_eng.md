@@ -33,6 +33,8 @@ investie/
 ├── scripts/
 │   └── mock-server.ts # Optional: Simple server to serve mock JSON
 └── package.json
+
+
 Step 2: Define Shared Types (packages/types)
 Create the single source of truth for all data structures. This is the contract between the frontend and backend.
 

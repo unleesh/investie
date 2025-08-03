@@ -1,0 +1,41 @@
+
+> backend@0.0.1 start:dev
+> nest start --watch
+
+[2J[3J[H[[90m3:09:35 PM[0m] Starting compilation in watch mode...
+
+[[90m3:09:38 PM[0m] Found 0 errors. Watching for file changes.
+
+(node:20772) Warning: Failed to load the ES module: /Users/seinoh/Desktop/github/investie/packages/mock/src/index.ts. Make sure to set "type": "module" in the nearest package.json file or use the .mjs extension.
+(Use `node --trace-warnings ...` to show where the warning was created)
+/Users/seinoh/Desktop/github/investie/packages/mock/src/index.ts:1
+import { MarketSummaryData, StockCardData, StockSymbol } from '@investie/types';
+^^^^^^
+
+SyntaxError: Cannot use import statement outside a module
+    at wrapSafe (node:internal/modules/cjs/loader:1620:18)
+    at Module._compile (node:internal/modules/cjs/loader:1662:20)
+    at Object..js (node:internal/modules/cjs/loader:1820:10)
+    at Module.load (node:internal/modules/cjs/loader:1423:32)
+    at Function._load (node:internal/modules/cjs/loader:1246:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1445:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (/Users/seinoh/Desktop/github/investie/apps/backend/src/market/market.service.ts:3:1)
+
+Node.js v22.18.0
+[2J[3J[H[[90m3:10:14 PM[0m] File change detected. Starting incremental compilation...
+
+[96m../../packages/mock/src/index.ts[0m:[93m2[0m:[93m31[0m - [91merror[0m[90m TS1543: [0mImporting a JSON file into an ECMAScript module requires a 'type: "json"' import attribute when 'module' is set to 'NodeNext'.
+
+[7m2[0m import marketSummaryData from './market-summary.json';
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96m../../packages/mock/src/index.ts[0m:[93m3[0m:[93m24[0m - [91merror[0m[90m TS1543: [0mImporting a JSON file into an ECMAScript module requires a 'type: "json"' import attribute when 'module' is set to 'NodeNext'.
+
+[7m3[0m import stocksData from './stocks.json';
+[7m [0m [91m                       ~~~~~~~~~~~~~~~[0m
+
+[[90m3:10:15 PM[0m] Found 2 errors. Watching for file changes.
+

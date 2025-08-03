@@ -1,0 +1,26 @@
+{
+  "name": "mock",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/mock/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/mock",
+        "main": "packages/mock/src/index.ts",
+        "tsConfig": "packages/mock/tsconfig.lib.json",
+        "assets": ["packages/mock/*.md", "packages/mock/src/**/*.json"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/mock/**/*.ts"]
+      }
+    }
+  },
+  "tags": ["scope:shared", "type:data"]
+}
