@@ -7,7 +7,7 @@ export class MarketController {
   constructor(private readonly marketService: MarketService) {}
 
   @Get()
-  getMarketSummary(): MarketSummaryData {
-    return this.marketService.getSummary();
+  async getMarketSummary(): Promise<MarketSummaryData> {
+    return await this.marketService.getSummary();
   }
 }

@@ -84,7 +84,7 @@ GET /api/v1/chat/health                      # Chat service health
 ## Backend Implementation Status
 
 ✅ **COMPLETE**: All backend features are fully implemented including:
-- Financial data services with FRED API and Google Finance integration
+- Financial data services with FRED API and SerpApi Google Finance integration
 - AI services with Claude API integration for evaluations and chat
 - Redis caching strategy (24h for economic data, 12h for AI content, 6h for news, 1h for chat)
 - Complete fallback system with comprehensive mock data
@@ -129,9 +129,8 @@ The project follows a "Vibe Coding" approach with phased development:
 
 ```bash
 CLAUDE_API_KEY=your-claude-api-key           # For AI evaluations and chat
-GOOGLE_NEWS_API_KEY=your-news-api-key        # For news summaries
-GOOGLE_FINANCE_API_KEY=your-finance-api-key  # For stock/market data
-FRED_API_KEY=your-fred-api-key              # For economic indicators
+SERPAPI_API_KEY=your-serpapi-key             # For Google Finance data via SerpApi
+FRED_API_KEY=your-fred-api-key              # For economic indicators (CPI, Interest Rate, Unemployment)
 ```
 
 ## Code Style Guidelines

@@ -7,12 +7,12 @@ export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 
   @Get()
-  getAllStocks(): StockCardData[] {
-    return this.stocksService.getAllStocks();
+  async getAllStocks(): Promise<StockCardData[]> {
+    return await this.stocksService.getAllStocks();
   }
 
   @Get(':symbol')
-  getStock(@Param('symbol') symbol: StockSymbol): StockCardData | null {
-    return this.stocksService.getStock(symbol);
+  async getStock(@Param('symbol') symbol: StockSymbol): Promise<StockCardData | null> {
+    return await this.stocksService.getStock(symbol);
   }
 }

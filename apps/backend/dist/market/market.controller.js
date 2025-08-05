@@ -17,8 +17,8 @@ let MarketController = class MarketController {
     constructor(marketService) {
         this.marketService = marketService;
     }
-    getMarketSummary() {
-        return this.marketService.getSummary();
+    async getMarketSummary() {
+        return await this.marketService.getSummary();
     }
 };
 exports.MarketController = MarketController;
@@ -26,7 +26,7 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], MarketController.prototype, "getMarketSummary", null);
 exports.MarketController = MarketController = __decorate([
     (0, common_1.Controller)('api/v1/market-summary'),
