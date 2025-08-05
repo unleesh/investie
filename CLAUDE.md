@@ -22,19 +22,30 @@ investie/
 
 ## Development Commands
 
-Since no package.json was found, these are the expected commands based on the documentation:
+Core development commands available from the root package.json:
 
 ```bash
 # Start all development servers concurrently
 npm run dev
 
 # Start individual services
-npm run dev:mobile    # React Native/Expo
-npm run dev:web       # Next.js development server  
-npm run dev:backend   # NestJS backend
+npm run dev:mobile    # React Native/Expo (expo start)
+npm run dev:web       # Next.js development server with Turbopack
+npm run dev:backend   # NestJS backend (nest start --watch)
 
-# Type checking
-npm run typecheck
+# Build commands
+npm run build         # Build all packages and apps
+npm run build:packages # Build shared packages
+npm run build:apps    # Build frontend and backend apps
+
+# Testing & Quality
+npm run test          # Run tests for all packages and apps
+npm run typecheck     # Type check all packages and apps
+npm run lint          # Run ESLint for web and backend
+
+# Maintenance
+npm run clean         # Clean dist and node_modules
+npm run install:all   # Install dependencies for all workspaces
 ```
 
 ## Core Data Types
@@ -84,19 +95,26 @@ GET /api/v1/chat/health                      # Chat service health
 ### Component Architecture
 - Mobile and web apps share identical component APIs for maximum code reusability
 - Chart components use Recharts library
-- Mobile: React Native with NativeWind for styling
-- Web: Next.js 14 App Router with Tailwind CSS
+- Mobile: React Native with NativeWind for styling (Expo ~53)
+- Web: Next.js 15.4.5 App Router with Tailwind CSS 4.x
 
-### Key Components to Implement
+### Key Components (Already Scaffolded)
 - **MarketSummaryCard**: Display market overview with AI-enhanced data
 - **StockCard**: Reusable component for individual stock data with price charts and AI evaluations
 - **StockPriceChart**: Historical price visualization
 - **AIEvaluationCard**: Display AI analysis with rating, confidence, and key factors
 - **AIChatbot**: Investment assistant (web: right sidebar, mobile: modal/bottom sheet)
+- **LineChart**: Generic chart component for various data visualizations
 
 ### Layout Structure
 - **Desktop**: Three-column layout (main content, watchlist widget, AI chatbot sidebar)
 - **Mobile**: Vertical scrolling with watchlist in header dropdown and chatbot as floating button/modal
+
+### Shared Dependencies
+All apps reference shared packages via file: protocol:
+- `@investie/types`: Complete TypeScript definitions
+- `@investie/mock`: JSON mock data with utility functions
+- `@investie/utils`: Formatter utilities for currency, percentages, dates
 
 ## Team Development Strategy
 
@@ -123,6 +141,32 @@ FRED_API_KEY=your-fred-api-key              # For economic indicators
 - Frontend components should accept typed props based on shared interfaces
 - Implement responsive design using shared Tailwind/NativeWind configuration
 - Chart components should use Recharts for consistency across platforms
+
+## Testing Commands
+
+Individual app testing:
+```bash
+# Backend testing (NestJS with Jest)
+cd apps/backend && npm run test          # Unit tests
+cd apps/backend && npm run test:e2e      # End-to-end tests
+cd apps/backend && npm run test:cov      # Coverage report
+
+# Package testing (All packages use Vitest)
+cd packages/types && npm test
+cd packages/mock && npm test  
+cd packages/utils && npm test
+
+# Root-level testing (runs all tests)
+npm run test
+```
+
+## Monorepo Architecture Details
+
+The project uses npm workspaces with local file: dependencies:
+- Each app (mobile, web, backend) imports shared packages via `file:../../packages/*`
+- Nx workspace provides additional tooling and caching capabilities
+- TypeScript strict mode enabled across all packages
+- Concurrent development servers via concurrently package
 
 ## Current Focus
 
