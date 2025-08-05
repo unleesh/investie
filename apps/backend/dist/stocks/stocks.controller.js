@@ -20,11 +20,11 @@ let StocksController = class StocksController {
     constructor(stocksService) {
         this.stocksService = stocksService;
     }
-    getAllStocks() {
-        return this.stocksService.getAllStocks();
+    async getAllStocks() {
+        return await this.stocksService.getAllStocks();
     }
-    getStock(symbol) {
-        return this.stocksService.getStock(symbol);
+    async getStock(symbol) {
+        return await this.stocksService.getStock(symbol);
     }
 };
 exports.StocksController = StocksController;
@@ -32,14 +32,14 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Array)
+    __metadata("design:returntype", Promise)
 ], StocksController.prototype, "getAllStocks", null);
 __decorate([
     (0, common_1.Get)(':symbol'),
     __param(0, (0, common_1.Param)('symbol')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], StocksController.prototype, "getStock", null);
 exports.StocksController = StocksController = __decorate([
     (0, common_1.Controller)('api/v1/stocks'),
