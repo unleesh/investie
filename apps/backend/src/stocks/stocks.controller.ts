@@ -12,7 +12,9 @@ export class StocksController {
   }
 
   @Get(':symbol')
-  getStock(@Param('symbol') symbol: StockSymbol): StockCardData | null {
+  async getStock(
+    @Param('symbol') symbol: StockSymbol,
+  ): Promise<StockCardData | null> {
     return this.stocksService.getStock(symbol);
   }
 }

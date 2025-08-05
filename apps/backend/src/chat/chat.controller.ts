@@ -14,13 +14,15 @@ export class ChatController {
   @Post('sessions/:id/messages')
   async sendMessage(
     @Param('id') sessionId: string,
-    @Body('message') message: string
+    @Body('message') message: string,
   ): Promise<ChatMessage> {
     return this.chatService.sendMessage(sessionId, message);
   }
 
   @Get('sessions/:id')
-  async getSession(@Param('id') sessionId: string): Promise<ChatSession | null> {
+  async getSession(
+    @Param('id') sessionId: string,
+  ): Promise<ChatSession | null> {
     return this.chatService.getSession(sessionId);
   }
 
@@ -30,7 +32,9 @@ export class ChatController {
   }
 
   @Delete('sessions/:id')
-  async endSession(@Param('id') sessionId: string): Promise<{ success: boolean }> {
+  async endSession(
+    @Param('id') sessionId: string,
+  ): Promise<{ success: boolean }> {
     return this.chatService.endSession(sessionId);
   }
 
@@ -38,7 +42,7 @@ export class ChatController {
   getHealth(): { status: string; timestamp: string } {
     return {
       status: 'ok',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }

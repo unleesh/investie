@@ -14,10 +14,15 @@ let AIEvaluationService = class AIEvaluationService {
             summary: `AI evaluation for ${symbol} will be generated using Claude API in Phase 1.`,
             rating: 'neutral',
             confidence: 75,
-            keyFactors: ['Market conditions', 'Financial metrics', 'Industry trends', 'Technical indicators'],
+            keyFactors: [
+                'Market conditions',
+                'Financial metrics',
+                'Industry trends',
+                'Technical indicators',
+            ],
             timeframe: '3M',
             source: 'claude_ai',
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
         };
         return mockEvaluation;
     }

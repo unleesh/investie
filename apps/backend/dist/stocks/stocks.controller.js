@@ -23,7 +23,7 @@ let StocksController = class StocksController {
     getAllStocks() {
         return this.stocksService.getAllStocks();
     }
-    getStock(symbol) {
+    async getStock(symbol) {
         return this.stocksService.getStock(symbol);
     }
 };
@@ -39,7 +39,7 @@ __decorate([
     __param(0, (0, common_1.Param)('symbol')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], StocksController.prototype, "getStock", null);
 exports.StocksController = StocksController = __decorate([
     (0, common_1.Controller)('api/v1/stocks'),

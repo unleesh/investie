@@ -3,6 +3,11 @@
 .nx/cache
 .nx/workspace-data
 
+# Environment files
+**/.env
+
+# News data storage
+apps/backend/data/
 
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md

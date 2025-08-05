@@ -13,12 +13,13 @@ const app_service_1 = require("./app.service");
 const market_module_1 = require("./market/market.module");
 const stocks_module_1 = require("./stocks/stocks.module");
 const chat_module_1 = require("./chat/chat.module");
+const news_module_1 = require("./news/news.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [market_module_1.MarketModule, stocks_module_1.StocksModule, chat_module_1.ChatModule],
+        imports: [market_module_1.MarketModule, stocks_module_1.StocksModule, chat_module_1.ChatModule, news_module_1.NewsModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

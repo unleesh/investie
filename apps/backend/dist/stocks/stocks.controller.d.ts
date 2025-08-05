@@ -4,5 +4,5 @@ export declare class StocksController {
     private readonly stocksService;
     constructor(stocksService: StocksService);
     getAllStocks(): StockCardData[];
-    getStock(symbol: StockSymbol): StockCardData | null;
+    getStock(symbol: StockSymbol): Promise<StockCardData | null>;
 }

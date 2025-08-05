@@ -16,7 +16,7 @@ let ChatService = class ChatService {
             sessionId,
             messages: [],
             isActive: true,
-            lastActivity: new Date().toISOString()
+            lastActivity: new Date().toISOString(),
         };
         this.sessions.set(sessionId, session);
         return session;
@@ -27,7 +27,7 @@ let ChatService = class ChatService {
             role: 'assistant',
             content: `This is a mock AI response to: "${message}". Real Claude API integration will be implemented in Phase 1.`,
             timestamp: new Date().toISOString(),
-            context: 'general'
+            context: 'general',
         };
         const session = this.sessions.get(sessionId);
         if (session) {
@@ -36,7 +36,7 @@ let ChatService = class ChatService {
                 role: 'user',
                 content: message,
                 timestamp: new Date().toISOString(),
-                context: 'general'
+                context: 'general',
             };
             session.messages.push(userMessage, mockResponse);
             session.lastActivity = new Date().toISOString();
@@ -48,7 +48,8 @@ let ChatService = class ChatService {
     }
     async getRecentSessions() {
         return Array.from(this.sessions.values())
-            .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime())
+            .sort((a, b) => new Date(b.lastActivity).getTime() -
+            new Date(a.lastActivity).getTime())
             .slice(0, 10);
     }
     async endSession(sessionId) {
