@@ -20,14 +20,18 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@investie/mock": "file:../../packages/mock",
+    "@investie/types": "file:../../packages/types",
+    "@investie/utils": "file:../../packages/utils",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "axios": "^1.7.9",
+    "joi": "^18.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "@investie/types": "file:../../packages/types",
-    "@investie/mock": "file:../../packages/mock",
-    "@investie/utils": "file:../../packages/utils"
+    "serpapi": "^2.1.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
