@@ -6,4 +6,5 @@
 .env
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+apps/backend/.env
 SuperClaude_Framework
