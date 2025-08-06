@@ -1,4 +1,4 @@
-import { MarketSummaryData, StockCardData, StockSymbol } from '@investie/types';
+import type { MarketSummaryData, StockCardData, StockSymbol } from '@investie/types';
 import marketSummaryData from './market-summary.json' with { type: 'json' };
 import stocksData from './stocks.json' with { type: 'json' };
 
