@@ -15,7 +15,7 @@ export class AppController {
     return {
       status: 'ok',
       message: 'Investie Backend API - Phase 0 Foundation',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }

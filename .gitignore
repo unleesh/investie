@@ -5,12 +5,14 @@
 .nx/workspace-data
 
 # Environment files
-.env
+**/.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-apps/backend/.env
+
+# News data storage
+apps/backend/data/
 
 # TypeScript build info files (incremental compilation artifacts)
 *.tsbuildinfo
@@ -62,8 +64,6 @@ Thumbs.db
 
 # Cursor AI files
 .cursor/rules/nx-rules.mdc
-
-# GitHub instructions
 .github/instructions/nx.instructions.md
 
 # SuperClaude Framework (development tool)
