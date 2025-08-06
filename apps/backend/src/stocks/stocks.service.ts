@@ -23,18 +23,9 @@ export class StocksService {
         return null;
       }
 
-      // Try to get fresh news data
-      const newsData = await this.newsService.getStockNews(symbol);
-
-      // If we have fresh news, update the stock data
-      if (newsData) {
-        return {
-          ...stockData,
-          newsSummary: newsData,
-        };
-      }
-
-      // Return stock data with existing mock news
+      // For now, return stock data with existing mock news
+      // In the future, this could integrate with the news service
+      // via processStockNews if needed for the stock cards
       return stockData;
     } catch (error) {
       this.logger.error(

@@ -29,13 +29,6 @@ let StocksService = StocksService_1 = class StocksService {
             if (!stockData) {
                 return null;
             }
-            const newsData = await this.newsService.getStockNews(symbol);
-            if (newsData) {
-                return {
-                    ...stockData,
-                    newsSummary: newsData,
-                };
-            }
             return stockData;
         }
         catch (error) {
