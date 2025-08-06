@@ -16,6 +16,7 @@ apps/backend/.env
 *.tsbuildinfo
 tsconfig.tsbuildinfo
 tsconfig.build.tsbuildinfo
+apps/backend/dist/tsconfig.build.tsbuildinfo
 
 # Build outputs
 dist/
