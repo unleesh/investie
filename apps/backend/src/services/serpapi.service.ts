@@ -1,12 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { getJson } from 'serpapi';
 
 @Injectable()
 export class SerpApiService {
   private readonly logger = new Logger(SerpApiService.name);
-
-  constructor(private configService: ConfigService) {}
 
   async getStockData(symbol: string, exchange: string = 'NASDAQ') {
     try {
@@ -15,7 +12,7 @@ export class SerpApiService {
       
       const result = await getJson({
         engine: 'google_finance',
-        api_key: this.configService.get('SERPAPI_API_KEY'),
+        api_key: process.env.SERPAPI_API_KEY,
         q: query,
         hl: 'en',
       });
@@ -33,7 +30,7 @@ export class SerpApiService {
       
       const result = await getJson({
         engine: 'google_finance',
-        api_key: this.configService.get('SERPAPI_API_KEY'),
+        api_key: process.env.SERPAPI_API_KEY,
         q: symbol,
         hl: 'en',
       });
@@ -51,7 +48,7 @@ export class SerpApiService {
       
       const result = await getJson({
         engine: 'google_finance',
-        api_key: this.configService.get('SERPAPI_API_KEY'),
+        api_key: process.env.SERPAPI_API_KEY,
         q: symbol,
         hl: 'en',
         prs: period,
@@ -71,7 +68,7 @@ export class SerpApiService {
       
       const result = await getJson({
         engine: 'google_finance',
-        api_key: this.configService.get('SERPAPI_API_KEY'),
+        api_key: process.env.SERPAPI_API_KEY,
         q: symbol,
         hl: 'en',
         gl: 'us',

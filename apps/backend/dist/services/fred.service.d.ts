@@ -1,10 +1,8 @@
-import { ConfigService } from '@nestjs/config';
 export declare class FredService {
-    private configService;
     private readonly logger;
     private readonly httpClient;
     private readonly baseUrl;
-    constructor(configService: ConfigService);
+    constructor();
     private getEconomicData;
     getCPI(): Promise<{
         value: number;

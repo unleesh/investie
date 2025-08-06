@@ -13,35 +13,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MarketService = void 0;
 const common_1 = require("@nestjs/common");
 const mock_1 = require("@investie/mock");
-const serpapi_service_1 = require("../services/serpapi.service");
-const fred_service_1 = require("../services/fred.service");
+const financial_data_service_1 = require("./financial-data.service");
 let MarketService = MarketService_1 = class MarketService {
-    serpApiService;
-    fredService;
+    financialDataService;
     logger = new common_1.Logger(MarketService_1.name);
-    constructor(serpApiService, fredService) {
-        this.serpApiService = serpApiService;
-        this.fredService = fredService;
+    constructor(financialDataService) {
+        this.financialDataService = financialDataService;
     }
     async getSummary() {
         try {
-            this.logger.log('Fetching market summary data from APIs');
-            const [sp500Result, vixResult, economicData] = await Promise.allSettled([
-                this.serpApiService.getMarketIndex('.INX:INDEXSP'),
-                this.serpApiService.getMarketIndex('VIX:INDEXCBOE'),
-                this.fredService.getAllEconomicIndicators(),
+            this.logger.log('Fetching market summary data from enhanced financial service');
+            const [economicData, marketData] = await Promise.allSettled([
+                this.financialDataService.getEconomicIndicators(),
+                this.financialDataService.getMarketIndices(),
             ]);
-            const sp500Data = sp500Result.status === 'fulfilled' ? sp500Result.value : null;
-            const vixData = vixResult.status === 'fulfilled' ? vixResult.value : null;
             const economics = economicData.status === 'fulfilled' ? economicData.value : null;
-            return this.transformToMarketSummary(sp500Data, vixData, economics);
+            const markets = marketData.status === 'fulfilled' ? marketData.value : null;
+            return this.transformToMarketSummary(economics, markets);
         }
         catch (error) {
             this.logger.error('Failed to fetch market data, falling back to mock data:', error.message);
             return (0, mock_1.getMarketSummary)();
         }
     }
-    transformToMarketSummary(sp500Data, vixData, economics) {
+    transformToMarketSummary(economics, markets) {
         try {
             const mockData = (0, mock_1.getMarketSummary)();
             return {
@@ -51,8 +46,8 @@ let MarketService = MarketService_1 = class MarketService {
                     source: mockData.fearGreedIndex.source,
                 },
                 vix: {
-                    value: this.extractPrice(vixData) || mockData.vix.value,
-                    status: mockData.vix.status,
+                    value: markets?.vix?.value || mockData.vix.value,
+                    status: markets?.vix?.status || mockData.vix.status,
                     source: mockData.vix.source,
                 },
                 interestRate: {
@@ -62,16 +57,16 @@ let MarketService = MarketService_1 = class MarketService {
                 },
                 cpi: {
                     value: economics?.cpi?.value || mockData.cpi.value,
-                    monthOverMonth: mockData.cpi.monthOverMonth,
-                    direction: mockData.cpi.direction,
+                    monthOverMonth: economics?.cpi?.monthOverMonth || mockData.cpi.monthOverMonth,
+                    direction: economics?.cpi?.direction || mockData.cpi.direction,
                     source: mockData.cpi.source,
                 },
                 unemploymentRate: {
                     value: economics?.unemploymentRate?.value || mockData.unemploymentRate.value,
-                    monthOverMonth: mockData.unemploymentRate.monthOverMonth,
+                    monthOverMonth: economics?.unemploymentRate?.monthOverMonth || mockData.unemploymentRate.monthOverMonth,
                     source: mockData.unemploymentRate.source,
                 },
-                sp500Sparkline: mockData.sp500Sparkline,
+                sp500Sparkline: markets?.sp500?.sparkline || mockData.sp500Sparkline,
             };
         }
         catch (error) {
@@ -79,35 +74,10 @@ let MarketService = MarketService_1 = class MarketService {
             return (0, mock_1.getMarketSummary)();
         }
     }
-    extractPrice(data) {
-        try {
-            return data?.summary?.price?.value || data?.price || null;
-        }
-        catch {
-            return null;
-        }
-    }
-    extractChange(data) {
-        try {
-            return data?.summary?.price?.change || data?.change || null;
-        }
-        catch {
-            return null;
-        }
-    }
-    extractChangePercent(data) {
-        try {
-            return data?.summary?.price?.change_percent || data?.change_percent || null;
-        }
-        catch {
-            return null;
-        }
-    }
 };
 exports.MarketService = MarketService;
 exports.MarketService = MarketService = MarketService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [serpapi_service_1.SerpApiService,
-        fred_service_1.FredService])
+    __metadata("design:paramtypes", [financial_data_service_1.FinancialDataService])
 ], MarketService);
 //# sourceMappingURL=market.service.js.map

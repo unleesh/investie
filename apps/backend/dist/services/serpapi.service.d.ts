@@ -1,8 +1,5 @@
-import { ConfigService } from '@nestjs/config';
 export declare class SerpApiService {
-    private configService;
     private readonly logger;
-    constructor(configService: ConfigService);
     getStockData(symbol: string, exchange?: string): Promise<import("serpapi").BaseResponse>;
     getMarketIndex(symbol: string): Promise<import("serpapi").BaseResponse>;
     getChartData(symbol: string, period?: string, interval?: string): Promise<import("serpapi").BaseResponse>;

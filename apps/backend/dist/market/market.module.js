@@ -10,16 +10,26 @@ exports.MarketModule = void 0;
 const common_1 = require("@nestjs/common");
 const market_controller_1 = require("./market.controller");
 const market_service_1 = require("./market.service");
+const financial_data_service_1 = require("./financial-data.service");
+const market_data_scheduler_1 = require("./market-data.scheduler");
 const serpapi_service_1 = require("../services/serpapi.service");
 const fred_service_1 = require("../services/fred.service");
+const cache_module_1 = require("../cache/cache.module");
 let MarketModule = class MarketModule {
 };
 exports.MarketModule = MarketModule;
 exports.MarketModule = MarketModule = __decorate([
     (0, common_1.Module)({
+        imports: [cache_module_1.CacheModule],
         controllers: [market_controller_1.MarketController],
-        providers: [market_service_1.MarketService, serpapi_service_1.SerpApiService, fred_service_1.FredService],
-        exports: [market_service_1.MarketService],
+        providers: [
+            market_service_1.MarketService,
+            financial_data_service_1.FinancialDataService,
+            market_data_scheduler_1.MarketDataScheduler,
+            serpapi_service_1.SerpApiService,
+            fred_service_1.FredService,
+        ],
+        exports: [market_service_1.MarketService, financial_data_service_1.FinancialDataService, market_data_scheduler_1.MarketDataScheduler],
     })
 ], MarketModule);
 //# sourceMappingURL=market.module.js.map

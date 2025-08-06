@@ -46,6 +46,24 @@ npm run lint          # Run ESLint for web and backend
 # Maintenance
 npm run clean         # Clean dist and node_modules
 npm run install:all   # Install dependencies for all workspaces
+
+# Backend Testing (Individual Commands)
+cd apps/backend && npm run test          # Unit tests
+cd apps/backend && npm run test:e2e      # End-to-end tests
+cd apps/backend && npm run test:cov      # Coverage report
+cd apps/backend && npm run start:prod    # Production build
+
+# Frontend Testing
+cd apps/web && npx tsc --noEmit          # Web typecheck only
+cd apps/web && npm run lint              # Web linting only
+
+# Package Testing (Individual)
+cd packages/types && npm test            # Types package tests
+cd packages/mock && npm test             # Mock data tests
+cd packages/utils && npm test            # Utils package tests
+
+# API Testing
+./test_endpoints.sh                      # Test all backend endpoints (requires backend running)
 ```
 
 ## Core Data Types
@@ -80,6 +98,17 @@ GET  /api/v1/chat/sessions                   # List recent sessions
 DELETE /api/v1/chat/sessions/:id             # End session
 GET /api/v1/chat/health                      # Chat service health
 ```
+
+**Backend Testing**: Use `./test_endpoints.sh` to validate all endpoints. Requires backend running on localhost:3000.
+
+**Backend Port**: Default port 3000, configurable via PORT environment variable.
+
+**Service Architecture**:
+- **Market Service** (`market/`): FRED API + SerpApi integration for economic indicators
+- **Stocks Service** (`stocks/`): Google Finance via SerpApi for real-time stock data
+- **AI Service** (`ai/`): Claude API integration for evaluations and analysis
+- **Chat Service** (`chat/`): AI chatbot with session management
+- **External Services** (`services/`): FRED and SerpApi client implementations
 
 ## Backend Implementation Status
 
@@ -141,32 +170,72 @@ FRED_API_KEY=your-fred-api-key              # For economic indicators (CPI, Inte
 - Implement responsive design using shared Tailwind/NativeWind configuration
 - Chart components should use Recharts for consistency across platforms
 
-## Testing Commands
+## Workspace Dependencies
 
-Individual app testing:
-```bash
-# Backend testing (NestJS with Jest)
-cd apps/backend && npm run test          # Unit tests
-cd apps/backend && npm run test:e2e      # End-to-end tests
-cd apps/backend && npm run test:cov      # Coverage report
+The project uses npm workspaces with local file: dependencies for maximum development flexibility:
 
-# Package testing (All packages use Vitest)
-cd packages/types && npm test
-cd packages/mock && npm test  
-cd packages/utils && npm test
-
-# Root-level testing (runs all tests)
-npm run test
+```json
+// Example from apps/backend/package.json
+{
+  "dependencies": {
+    "@investie/types": "file:../../packages/types",
+    "@investie/mock": "file:../../packages/mock", 
+    "@investie/utils": "file:../../packages/utils"
+  }
+}
 ```
 
-## Monorepo Architecture Details
+**Important**: After making changes to shared packages, run `npm run build:packages` to ensure TypeScript builds are updated.
 
-The project uses npm workspaces with local file: dependencies:
-- Each app (mobile, web, backend) imports shared packages via `file:../../packages/*`
-- Nx workspace provides additional tooling and caching capabilities
-- TypeScript strict mode enabled across all packages
-- Concurrent development servers via concurrently package
+**Package Build Order**:
+1. `packages/types` - Must be built first (other packages depend on it)
+2. `packages/utils` - Can be built after types
+3. `packages/mock` - Can be built independently
+4. Apps consume the built packages via file: protocol
+
+## Technology Stack Details
+
+**Backend (NestJS)**:
+- Framework: NestJS 11.x with Express
+- Testing: Jest with coverage support
+- External APIs: SerpApi (Google Finance), FRED API, Claude AI
+- Validation: Joi for request validation
+- HTTP Client: Axios for external API calls
+
+**Web Frontend (Next.js)**:
+- Framework: Next.js 15.4.5 with App Router
+- Styling: Tailwind CSS 4.x
+- Development: Turbopack for fast development builds
+- React: Version 19.x
+
+**Mobile Frontend (React Native/Expo)**:
+- Framework: Expo ~53.0.20
+- React Native: 0.79.5
+- Styling: NativeWind (planned)
+- Platform: Cross-platform iOS/Android
+
+**Shared Packages**:
+- TypeScript 5.x across all packages
+- Testing: Vitest for packages, Jest for backend
+- Build: Native TypeScript compilation
+
+**Development Environment**:
+- Node.js >=18.0.0, npm >=9.0.0
+- Nx workspace for tooling (version 21.3.11)
+- Concurrent development with `concurrently` package
 
 ## Current Focus
 
 The backend is complete and ready for frontend development. Priority should be on building the MarketSummaryCard and StockCard components using the fully functional API endpoints or falling back to comprehensive mock data during development.
+
+## Common Troubleshooting
+
+**Build Issues**: Run `npm run clean` followed by `npm run install:all` to reset dependencies.
+
+**Backend Not Starting**: Ensure port 3000 is available or set PORT environment variable.
+
+**Package Import Errors**: Rebuild shared packages with `npm run build:packages`.
+
+**API Connection Issues**: Check if required API keys are set in environment variables.
+
+**Type Errors**: Run `npm run typecheck` to identify TypeScript issues across all packages.

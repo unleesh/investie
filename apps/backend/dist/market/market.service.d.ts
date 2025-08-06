@@ -1,14 +1,9 @@
 import type { MarketSummaryData } from '@investie/types';
-import { SerpApiService } from '../services/serpapi.service';
-import { FredService } from '../services/fred.service';
+import { FinancialDataService } from './financial-data.service';
 export declare class MarketService {
-    private serpApiService;
-    private fredService;
+    private financialDataService;
     private readonly logger;
-    constructor(serpApiService: SerpApiService, fredService: FredService);
+    constructor(financialDataService: FinancialDataService);
     getSummary(): Promise<MarketSummaryData>;
     private transformToMarketSummary;
-    private extractPrice;
-    private extractChange;
-    private extractChangePercent;
 }

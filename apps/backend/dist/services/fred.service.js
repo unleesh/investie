@@ -15,15 +15,12 @@ var FredService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FredService = void 0;
 const common_1 = require("@nestjs/common");
-const config_1 = require("@nestjs/config");
 const axios_1 = __importDefault(require("axios"));
 let FredService = FredService_1 = class FredService {
-    configService;
     logger = new common_1.Logger(FredService_1.name);
     httpClient;
     baseUrl = 'https://api.stlouisfed.org/fred';
-    constructor(configService) {
-        this.configService = configService;
+    constructor() {
         this.httpClient = axios_1.default.create({
             baseURL: this.baseUrl,
             timeout: 10000,
@@ -35,7 +32,7 @@ let FredService = FredService_1 = class FredService {
             const response = await this.httpClient.get('/series/observations', {
                 params: {
                     series_id: seriesId,
-                    api_key: this.configService.get('FRED_API_KEY'),
+                    api_key: process.env.FRED_API_KEY,
                     file_type: 'json',
                     limit,
                     sort_order: 'desc',
@@ -118,6 +115,6 @@ let FredService = FredService_1 = class FredService {
 exports.FredService = FredService;
 exports.FredService = FredService = FredService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService])
+    __metadata("design:paramtypes", [])
 ], FredService);
 //# sourceMappingURL=fred.service.js.map
