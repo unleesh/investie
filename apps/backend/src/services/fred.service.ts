@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 
 @Injectable()
@@ -8,7 +7,7 @@ export class FredService {
   private readonly httpClient: AxiosInstance;
   private readonly baseUrl = 'https://api.stlouisfed.org/fred';
 
-  constructor(private configService: ConfigService) {
+  constructor() {
     this.httpClient = axios.create({
       baseURL: this.baseUrl,
       timeout: 10000,
@@ -22,7 +21,7 @@ export class FredService {
       const response = await this.httpClient.get('/series/observations', {
         params: {
           series_id: seriesId,
-          api_key: this.configService.get('FRED_API_KEY'),
+          api_key: process.env.FRED_API_KEY,
           file_type: 'json',
           limit,
           sort_order: 'desc',

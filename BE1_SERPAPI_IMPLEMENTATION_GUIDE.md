@@ -8,14 +8,13 @@
 ### 1. API Keys
 - **FRED API Key**: 경제 지표 데이터 (CPI, Interest Rate, Unemployment)
 - **SerpApi Key**: Google Finance 데이터 (주식 가격, VIX, S&P500)
-  - 제공된 키: `8c078329b04057f671dbe708facfe8c3d58955f68407bab792b09f46cc8f6ca4`
 - **Claude API Key**: AI 평가 및 채팅 (선택사항, BE1과 직접 관련 없음)
 
 ### 2. 환경 설정
 ```bash
 # apps/backend/.env 파일이 생성되어 있음
-SERPAPI_API_KEY=8c078329b04057f671dbe708facfe8c3d58955f68407bab792b09f46cc8f6ca4
-FRED_API_KEY=c8fe579bd8af12c6d2debebedc700fec
+SERPAPI_API_KEY=
+FRED_API_KEY=
 ```
 
 ## 설치된 패키지들
