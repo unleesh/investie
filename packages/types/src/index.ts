@@ -88,9 +88,8 @@ export interface StockTechnicals {
 }
 
 export interface StockNewsSummary {
-  headline: string; // Claude-generated one-liner
-  sentiment: 'positive' | 'neutral' | 'negative';
-  source: 'google_news + claude_ai';
+  headline: string; // AI-generated one-liner based on news content
+  source: 'google_news + ai_analysis';
 }
 
 export interface SectorPerformance {

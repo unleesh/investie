@@ -2,12 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { StockCardData, StockSymbol } from '@investie/types';
 import { getAllStocks, getStock } from '@investie/mock';
 import { SerpApiService } from '../services/serpapi.service';
+import { NewsService } from '../news/news.service';
 
 @Injectable()
 export class StocksService {
   private readonly logger = new Logger(StocksService.name);
 
-  constructor(private serpApiService: SerpApiService) {}
+  constructor(
+    private serpApiService: SerpApiService,
+    private readonly newsService: NewsService
+  ) {}
 
   async getAllStocks(): Promise<StockCardData[]> {
     const symbols: StockSymbol[] = ['AAPL', 'TSLA', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'NFLX', 'AVGO', 'AMD'];
@@ -47,6 +51,12 @@ export class StocksService {
       this.logger.error(`Failed to fetch chart for ${symbol}:`, error.message);
       return null;
     }
+  }
+
+  getStockSync(symbol: StockSymbol): StockCardData | null {
+    // Synchronous version for backward compatibility
+    const stock = getStock(symbol);
+    return stock || null;
   }
 
   private async getStockData(symbol: StockSymbol): Promise<StockCardData | null> {
