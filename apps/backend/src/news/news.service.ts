@@ -322,7 +322,8 @@ export class NewsService {
       // Return compatible type, but store full data separately
       return {
         headline: topHeadline,
-        source: 'google_news + ai_analysis' as const,
+        sentiment: 'neutral' as const, // Default sentiment, will be enhanced by AI in future
+        source: 'google_news + claude_ai' as const,
         // Store articles temporarily in a property for storage method
         _fullArticles: newsResults
       } as StockNewsSummary & { _fullArticles?: SerpApiNewsResult[] };

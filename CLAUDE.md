@@ -119,6 +119,12 @@ GET /api/v1/chat/health                      # Chat service health
 - Complete fallback system with comprehensive mock data
 - All 10 target stocks with integrated AI evaluations, news summaries, and technical analysis
 
+**Backend Service Architecture**:
+- Market data refreshes automatically during trading hours via scheduler
+- All endpoints have health monitoring and manual update capabilities
+- Graceful degradation to mock data when external APIs fail
+- News service includes AI-powered news summarization for each stock
+
 ## Frontend Development Guidelines
 
 ### Component Architecture
@@ -228,6 +234,14 @@ The project uses npm workspaces with local file: dependencies for maximum develo
 
 The backend is complete and ready for frontend development. Priority should be on building the MarketSummaryCard and StockCard components using the fully functional API endpoints or falling back to comprehensive mock data during development.
 
+## Verification & Testing
+
+**Backend Verification**: Use `./verify_be1_implementation.sh` to verify all backend services are working correctly.
+
+**Full API Testing**: Use `./test_endpoints.sh` to test all backend endpoints with sample requests.
+
+**Mock Data Updates**: Run `npm run update-mock-data` to refresh mock data when needed.
+
 ## Common Troubleshooting
 
 **Build Issues**: Run `npm run clean` followed by `npm run install:all` to reset dependencies.
@@ -239,3 +253,5 @@ The backend is complete and ready for frontend development. Priority should be o
 **API Connection Issues**: Check if required API keys are set in environment variables.
 
 **Type Errors**: Run `npm run typecheck` to identify TypeScript issues across all packages.
+
+**External API Failures**: Backend includes comprehensive fallback to mock data when external APIs are unavailable.
