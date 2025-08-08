@@ -5,6 +5,8 @@ import * as path from 'path';
 import OpenAI from 'openai';
 import type { StockSymbol, StockNewsSummary } from '@investie/types';
 import { StockValidatorHelper, ValidationResult } from './stock-validator.helper';
+import { ClaudeService } from '../services/claude.service';
+import { CacheService } from '../cache/cache.service';
 
 interface SerpApiNewsResult {
   title: string;
@@ -60,7 +62,10 @@ export class NewsService {
   private readonly openai: OpenAI | null;
   private readonly stockValidator: StockValidatorHelper;
 
-  constructor() {
+  constructor(
+    private readonly claudeService: ClaudeService,
+    private readonly cacheService: CacheService,
+  ) {
     // Initialize OpenAI client if API key is available
     this.openai = process.env.OPENAI_API_KEY 
       ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -319,10 +324,13 @@ export class NewsService {
       // Store comprehensive news data but return summary for compatibility
       const topHeadline = newsResults[0].title || `${symbol} stock news`;
       
+      // Analyze sentiment using AI
+      const sentiment = await this.analyzeSentiment(topHeadline, newsResults.slice(0, 3));
+      
       // Return compatible type, but store full data separately
       return {
         headline: topHeadline,
-        sentiment: 'neutral' as const, // Default sentiment, will be enhanced by AI in future
+        sentiment,
         source: 'google_news + claude_ai' as const,
         // Store articles temporarily in a property for storage method
         _fullArticles: newsResults
@@ -678,5 +686,118 @@ Focus on:
     } catch (error) {
       this.logger.error(`Failed to store overview for ${symbol}:`, error instanceof Error ? error.message : 'Unknown error');
     }
+  }
+
+  // AI Sentiment Analysis method
+  private async analyzeSentiment(
+    headline: string, 
+    articles: SerpApiNewsResult[]
+  ): Promise<'positive' | 'neutral' | 'negative'> {
+    try {
+      // Check cache first (6-hour TTL for news sentiment)
+      const cacheKey = `sentiment:${Buffer.from(headline).toString('base64').slice(0, 20)}`;
+      const cached = this.cacheService.getNewsData<'positive' | 'neutral' | 'negative'>(cacheKey);
+      if (cached) {
+        return cached;
+      }
+
+      this.logger.log('Analyzing news sentiment with AI');
+      
+      const articlesText = articles
+        .map(article => `${article.title}: ${article.snippet || ''}`)
+        .join('\n');
+
+      const sentimentPrompt = `
+Analyze the sentiment of these financial news headlines and content:
+
+Main Headline: ${headline}
+
+Additional Articles:
+${articlesText}
+
+Classify the overall sentiment as positive, neutral, or negative based on:
+- Market impact implications
+- Company performance indicators  
+- Investor sentiment tone
+- Economic implications
+- Risk factors mentioned
+
+Consider the financial context and potential impact on stock price.
+
+Respond with only one word: positive, neutral, or negative
+      `;
+
+      const response = await this.claudeService.generateResponse(sentimentPrompt, 50);
+      const sentiment = this.parseSentimentResponse(response);
+      
+      // Cache the result
+      this.cacheService.setNewsData(cacheKey, sentiment);
+      
+      this.logger.log(`Sentiment analysis result: ${sentiment}`);
+      return sentiment;
+    } catch (error) {
+      this.logger.error('Sentiment analysis failed:', error.message);
+      
+      // Fallback to simple keyword-based analysis
+      return this.getKeywordBasedSentiment(headline);
+    }
+  }
+
+  private parseSentimentResponse(response: string): 'positive' | 'neutral' | 'negative' {
+    const normalized = response.toLowerCase().trim();
+    
+    if (normalized.includes('positive')) return 'positive';
+    if (normalized.includes('negative')) return 'negative';
+    if (normalized.includes('neutral')) return 'neutral';
+    
+    // If response is unclear, try to extract sentiment from response content
+    if (normalized.includes('bullish') || normalized.includes('optimistic') || normalized.includes('growth')) {
+      return 'positive';
+    }
+    if (normalized.includes('bearish') || normalized.includes('pessimistic') || normalized.includes('decline')) {
+      return 'negative';
+    }
+    
+    return 'neutral';
+  }
+
+  private getKeywordBasedSentiment(headline: string): 'positive' | 'neutral' | 'negative' {
+    const text = headline.toLowerCase();
+    
+    const positiveWords = [
+      'growth', 'gains', 'surge', 'rally', 'bullish', 'optimistic', 
+      'beat', 'exceed', 'strong', 'robust', 'positive', 'up', 'rise',
+      'record', 'milestone', 'breakthrough', 'success', 'expansion'
+    ];
+    
+    const negativeWords = [
+      'decline', 'fall', 'drop', 'crash', 'bearish', 'pessimistic',
+      'miss', 'weak', 'poor', 'negative', 'down', 'loss', 'cuts',
+      'concern', 'worry', 'risk', 'warning', 'trouble', 'struggle'
+    ];
+
+    const positiveScore = positiveWords.reduce((score, word) => 
+      score + (text.includes(word) ? 1 : 0), 0);
+    const negativeScore = negativeWords.reduce((score, word) => 
+      score + (text.includes(word) ? 1 : 0), 0);
+
+    if (positiveScore > negativeScore) return 'positive';
+    if (negativeScore > positiveScore) return 'negative';
+    return 'neutral';
+  }
+
+  // Health check for news service
+  async healthCheck(): Promise<{
+    status: string;
+    serpApiConfigured: boolean;
+    claudeConfigured: boolean;
+    openaiConfigured: boolean;
+  }> {
+    return {
+      status: 'operational',
+      serpApiConfigured: !!this.serpApiKey,
+      claudeConfigured: !!(await this.claudeService.healthCheck()).hasApiKey,
+      openaiConfigured: !!this.openai,
+    };
   }
 }

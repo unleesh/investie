@@ -20,7 +20,13 @@ export class MarketController {
   }
 
   @Get('health')
-  async getHealthStatus() {
+  async getHealthStatus(): Promise<{
+    service: string;
+    status: string;
+    scheduler: any;
+    cache: any;
+    timestamp: string;
+  }> {
     const schedulerStatus = this.marketDataScheduler.getSchedulerStatus();
     const cacheStats = this.cacheService.getCacheStats();
     

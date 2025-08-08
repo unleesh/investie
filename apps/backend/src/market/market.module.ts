@@ -5,6 +5,8 @@ import { FinancialDataService } from './financial-data.service';
 import { MarketDataScheduler } from './market-data.scheduler';
 import { SerpApiService } from '../services/serpapi.service';
 import { FredService } from '../services/fred.service';
+import { ClaudeService } from '../services/claude.service';
+import { FearGreedService } from '../services/fear-greed.service';
 import { CacheModule } from '../cache/cache.module';
 
 @Module({
@@ -16,6 +18,8 @@ import { CacheModule } from '../cache/cache.module';
     MarketDataScheduler,
     SerpApiService, 
     FredService,
+    ClaudeService,
+    FearGreedService,
   ],
   exports: [MarketService, FinancialDataService, MarketDataScheduler],
 })

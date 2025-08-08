@@ -3,9 +3,10 @@ import { StocksController } from './stocks.controller';
 import { StocksService } from './stocks.service';
 import { SerpApiService } from '../services/serpapi.service';
 import { NewsModule } from '../news/news.module';
+import { AIModule } from '../ai/ai.module';
 
 @Module({
-  imports: [NewsModule],
+  imports: [NewsModule, AIModule],
   controllers: [StocksController],
   providers: [StocksService, SerpApiService],
   exports: [StocksService],

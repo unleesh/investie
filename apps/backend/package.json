@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.59.0",
     "@investie/mock": "file:../../packages/mock",
     "@investie/types": "file:../../packages/types",
     "@investie/utils": "file:../../packages/utils",
