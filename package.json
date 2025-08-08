@@ -28,6 +28,7 @@
     "lint": "npm run lint:web && npm run lint:backend",
     "lint:web": "cd apps/web && npm run lint",
     "lint:backend": "cd apps/backend && npm run lint",
+    "update-mock-data": "npx ts-node scripts/update-mock-data.ts",
     "clean": "npm run clean:packages && npm run clean:apps",
     "clean:packages": "rm -rf packages/*/dist packages/*/node_modules",
     "clean:apps": "rm -rf apps/*/dist apps/*/node_modules apps/*/.next",
@@ -36,7 +37,10 @@
     "install:apps": "cd apps/mobile && npm install && cd ../web && npm install && cd ../backend && npm install"
   },
   "devDependencies": {
+    "axios": "^1.7.0",
     "concurrently": "^9.1.0",
+    "serpapi": "^2.0.0",
+    "ts-node": "^10.9.0",
     "typescript": "^5.0.0",
     "vitest": "^2.1.0"
   },
