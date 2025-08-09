@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { StocksService } from './stocks.service';
 import { SerpApiService } from '../services/serpapi.service';
 import type { StockCardData, StockSymbol } from '../types';
@@ -15,42 +15,45 @@ export class StocksController {
     return await this.stocksService.getAllStocks();
   }
 
-  @Get('debug/:symbol')
-  async debugStock(@Param('symbol') symbol: StockSymbol) {
-    try {
-      // Direct SerpApi test
-      const rawData = await this.serpApiService.getStockData(symbol, 'NASDAQ');
-      
-      return {
-        symbol,
-        timestamp: new Date().toISOString(),
-        serpApiConfigured: !!process.env.SERPAPI_API_KEY,
-        rawSerpApiData: rawData,
-        extractedPrice: rawData?.summary?.price,
-        summaryKeys: rawData?.summary ? Object.keys(rawData.summary) : [],
-        debug: {
-          apiKey: process.env.SERPAPI_API_KEY ? `${process.env.SERPAPI_API_KEY.slice(0, 8)}...` : 'NOT_SET',
-          debugMode: process.env.DEBUG_MODE,
-          environment: process.env.NODE_ENV
-        }
-      };
-    } catch (error) {
-      return {
-        symbol,
-        error: error.message,
-        timestamp: new Date().toISOString(),
-        serpApiConfigured: !!process.env.SERPAPI_API_KEY,
-        debug: {
-          apiKey: process.env.SERPAPI_API_KEY ? `${process.env.SERPAPI_API_KEY.slice(0, 8)}...` : 'NOT_SET',
-          debugMode: process.env.DEBUG_MODE,
-          environment: process.env.NODE_ENV
-        }
-      };
-    }
-  }
-
   @Get(':symbol')
-  async getStock(@Param('symbol') symbol: StockSymbol): Promise<StockCardData | null> {
+  async getStock(
+    @Param('symbol') symbol: StockSymbol,
+    @Query('debug') debug?: string
+  ): Promise<StockCardData | null | any> {
+    
+    // Debug mode with ?debug=true
+    if (debug === 'true') {
+      try {
+        const rawData = await this.serpApiService.getStockData(symbol, 'NASDAQ');
+        
+        return {
+          symbol,
+          timestamp: new Date().toISOString(),
+          serpApiConfigured: !!process.env.SERPAPI_API_KEY,
+          rawSerpApiData: rawData,
+          extractedPrice: rawData?.summary?.price,
+          summaryKeys: rawData?.summary ? Object.keys(rawData.summary) : [],
+          debug: {
+            apiKey: process.env.SERPAPI_API_KEY ? `${process.env.SERPAPI_API_KEY.slice(0, 8)}...` : 'NOT_SET',
+            debugMode: process.env.DEBUG_MODE,
+            environment: process.env.NODE_ENV
+          }
+        };
+      } catch (error) {
+        return {
+          symbol,
+          error: error.message,
+          timestamp: new Date().toISOString(),
+          serpApiConfigured: !!process.env.SERPAPI_API_KEY,
+          debug: {
+            apiKey: process.env.SERPAPI_API_KEY ? `${process.env.SERPAPI_API_KEY.slice(0, 8)}...` : 'NOT_SET',
+            debugMode: process.env.DEBUG_MODE,
+            environment: process.env.NODE_ENV
+          }
+        };
+      }
+    }
+    
     return await this.stocksService.getStock(symbol);
   }
 }
