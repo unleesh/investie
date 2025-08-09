@@ -73,11 +73,21 @@ export class StocksService {
   }
 
   private async getStockData(symbol: StockSymbol): Promise<StockCardData | null> {
+    const debugMode = process.env.DEBUG_MODE === 'true';
+    const startTime = Date.now();
+    
     try {
       this.logger.log(`[API-FIRST] Fetching comprehensive data for ${symbol}`);
       
       // Use TradingView-compatible format for API calls
       const tradingViewSymbol = `NASDAQ:${symbol}`;
+      
+      if (debugMode) {
+        this.logger.log(`[DEBUG] ${symbol} - Starting comprehensive data fetch`, {
+          tradingViewSymbol,
+          timestamp: new Date().toISOString()
+        });
+      }
       
       const [stockData, newsData, aiEvaluation, technicalData] = await Promise.allSettled([
         this.serpApiService.getStockData(symbol, 'NASDAQ'),
@@ -85,15 +95,65 @@ export class StocksService {
         this.claudeService.generateStockEvaluation(symbol),
         this.technicalService.getAnalysis(symbol)
       ]);
+      
+      const dataFetchTime = Date.now() - startTime;
+      
+      if (debugMode) {
+        this.logger.log(`[DEBUG] ${symbol} - Promise.allSettled results:`, {
+          stockData: stockData.status,
+          newsData: newsData.status,
+          aiEvaluation: aiEvaluation.status,
+          technicalData: technicalData.status,
+          fetchTime: `${dataFetchTime}ms`,
+          stockDataReason: stockData.status === 'rejected' ? stockData.reason?.message : 'success',
+          newsDataReason: newsData.status === 'rejected' ? newsData.reason?.message : 'success',
+          aiEvaluationReason: aiEvaluation.status === 'rejected' ? aiEvaluation.reason?.message : 'success'
+        });
+      }
 
       const stock = stockData.status === 'fulfilled' ? stockData.value : null;
       const news = newsData.status === 'fulfilled' ? newsData.value : [];
       const aiEval = aiEvaluation.status === 'fulfilled' ? aiEvaluation.value : null;
       const technical = technicalData.status === 'fulfilled' ? technicalData.value : null;
+      
+      if (debugMode) {
+        this.logger.log(`[DEBUG] ${symbol} - Data extraction results:`, {
+          hasStockData: !!stock,
+          stockPrice: stock?.summary?.price,
+          stockSummaryKeys: stock?.summary ? Object.keys(stock.summary) : [],
+          newsCount: news?.length || 0,
+          hasAiEval: !!aiEval,
+          hasTechnical: !!technical,
+          stockDataSample: stock ? JSON.stringify(stock).slice(0, 300) : 'null'
+        });
+      }
 
-      return this.transformToStockCardData(stock, news, aiEval, technical, symbol);
+      const result = this.transformToStockCardData(stock, news, aiEval, technical, symbol);
+      
+      const totalTime = Date.now() - startTime;
+      if (debugMode) {
+        this.logger.log(`[DEBUG] ${symbol} - Final result:`, {
+          hasResult: !!result,
+          priceValue: result?.price?.current,
+          priceChange: result?.price?.change,
+          priceChangePercent: result?.price?.changePercent,
+          peRatio: result?.fundamentals?.pe,
+          marketCap: result?.fundamentals?.marketCap,
+          totalProcessingTime: `${totalTime}ms`
+        });
+      }
+      
+      return result;
     } catch (error) {
+      const totalTime = Date.now() - startTime;
       this.logger.error(`[API-FIRST] Failed to fetch data for ${symbol}:`, error.message);
+      if (debugMode) {
+        this.logger.error(`[DEBUG] ${symbol} - Complete error details:`, {
+          error: error.message,
+          stack: error.stack?.slice(0, 500),
+          processingTime: `${totalTime}ms`
+        });
+      }
       throw error; // API-first: throw instead of using fallback
     }
   }
@@ -185,9 +245,29 @@ export class StocksService {
   }
 
   private extractPrice(data: any): number {
+    const debugMode = process.env.DEBUG_MODE === 'true';
     try {
-      return data?.summary?.price || data?.summary?.price?.value || data?.price || 0;
-    } catch {
+      const price1 = data?.summary?.price;
+      const price2 = data?.summary?.price?.value; 
+      const price3 = data?.price;
+      
+      if (debugMode) {
+        this.logger.log(`[DEBUG] Price extraction analysis:`, {
+          hasData: !!data,
+          hasSummary: !!data?.summary,
+          summaryPrice: price1,
+          summaryPriceValue: price2,
+          directPrice: price3,
+          summaryKeys: data?.summary ? Object.keys(data.summary) : [],
+          finalPrice: price1 || price2 || price3 || 0
+        });
+      }
+      
+      return price1 || price2 || price3 || 0;
+    } catch (error) {
+      if (debugMode) {
+        this.logger.error(`[DEBUG] Price extraction error:`, error.message);
+      }
       return 0;
     }
   }

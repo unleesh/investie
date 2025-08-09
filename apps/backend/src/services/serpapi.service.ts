@@ -19,14 +19,29 @@ export class SerpApiService {
   }
 
   async getStockData(symbol: string, exchange: string = 'NASDAQ') {
+    const debugMode = process.env.DEBUG_MODE === 'true';
+    const startTime = Date.now();
+    
     if (!this.isConfigured) {
       this.logger.warn(`[API-FIRST] SerpApi not configured for ${symbol}`);
+      if (debugMode) {
+        this.logger.warn(`[DEBUG] SerpApi key status: ${this.apiKey ? 'HAS_KEY' : 'NO_KEY'}`);
+      }
       throw new Error(`SerpApi key required for ${symbol} stock data`);
     }
 
     try {
       const query = `${symbol}:${exchange}`;
-      this.logger.log(`Fetching stock data for ${query}`);
+      this.logger.log(`[DEBUG] Fetching stock data for ${query}`);
+      
+      if (debugMode) {
+        this.logger.log(`[DEBUG] SerpApi request params:`, {
+          engine: 'google_finance',
+          api_key: `${this.apiKey.slice(0, 8)}...`,
+          query: query,
+          hl: 'en'
+        });
+      }
       
       const result = await getJson({
         engine: 'google_finance',
@@ -34,16 +49,55 @@ export class SerpApiService {
         q: query,
         hl: 'en',
       });
+      
+      const processingTime = Date.now() - startTime;
+      if (debugMode) {
+        this.logger.log(`[DEBUG] SerpApi response time: ${processingTime}ms for ${symbol}`);
+        this.logger.log(`[DEBUG] SerpApi response structure:`, {
+          hasResult: !!result,
+          hasSummary: !!result?.summary,
+          summaryKeys: result?.summary ? Object.keys(result.summary) : [],
+          priceValue: result?.summary?.price,
+          sampleData: JSON.stringify(result).slice(0, 200)
+        });
+      }
 
       if (!result || !result.summary) {
         this.logger.warn(`[API-FIRST] No data returned from SerpApi for ${symbol}`);
+        if (debugMode) {
+          this.logger.error(`[DEBUG] SerpApi empty response details:`, {
+            resultExists: !!result,
+            resultKeys: result ? Object.keys(result) : [],
+            summaryExists: !!result?.summary,
+            fullResponse: JSON.stringify(result, null, 2)
+          });
+        }
         throw new Error(`No stock data available for ${symbol}`);
       }
 
-      this.logger.log(`Successfully fetched stock data for ${symbol}`);
+      this.logger.log(`✅ Successfully fetched stock data for ${symbol}`);
+      if (debugMode) {
+        this.logger.log(`[DEBUG] Final stock data for ${symbol}:`, {
+          price: result?.summary?.price,
+          change: result?.summary?.price_change,
+          marketCap: result?.summary?.market_cap,
+          volume: result?.summary?.volume,
+          processingTime: `${Date.now() - startTime}ms`
+        });
+      }
       return result;
     } catch (error) {
+      const processingTime = Date.now() - startTime;
       this.logger.error(`[API-FIRST] Failed to fetch stock data for ${symbol}:`, error.message);
+      if (debugMode) {
+        this.logger.error(`[DEBUG] SerpApi error details:`, {
+          symbol,
+          error: error.message,
+          stack: error.stack,
+          processingTime: `${processingTime}ms`,
+          apiKeyStatus: this.apiKey ? 'CONFIGURED' : 'MISSING'
+        });
+      }
       throw error;
     }
   }
