@@ -15,11 +15,12 @@ export class AppController {
   }
 
   @Get('api/v1/health')
-  getHealth(): { status: string; message: string; timestamp: string } {
+  getHealth(): { status: string; message: string; timestamp: string; version: string } {
     return {
       status: 'ok',
       message: 'Investie Backend API - Phase 0 Foundation',
       timestamp: new Date().toISOString(),
+      version: 'v1.0.3-serpapi-fix-deployed',
     };
   }
 
