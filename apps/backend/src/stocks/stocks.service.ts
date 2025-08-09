@@ -247,23 +247,24 @@ export class StocksService {
   private extractPrice(data: any): number {
     const debugMode = process.env.DEBUG_MODE === 'true';
     try {
-      const price1 = data?.summary?.price;
-      const price2 = data?.summary?.price?.value; 
-      const price3 = data?.price;
+      // SerpApi Google Finance returns extracted_price as a number
+      const extractedPrice = data?.summary?.extracted_price;
+      const priceString = data?.summary?.price; // "$229.35"
+      const marketPrice = data?.summary?.market?.extracted_price;
       
       if (debugMode) {
         this.logger.log(`[DEBUG] Price extraction analysis:`, {
           hasData: !!data,
           hasSummary: !!data?.summary,
-          summaryPrice: price1,
-          summaryPriceValue: price2,
-          directPrice: price3,
+          extractedPrice: extractedPrice,
+          priceString: priceString,
+          marketPrice: marketPrice,
           summaryKeys: data?.summary ? Object.keys(data.summary) : [],
-          finalPrice: price1 || price2 || price3 || 0
+          finalPrice: extractedPrice || marketPrice || 0
         });
       }
       
-      return price1 || price2 || price3 || 0;
+      return extractedPrice || marketPrice || 0;
     } catch (error) {
       if (debugMode) {
         this.logger.error(`[DEBUG] Price extraction error:`, error.message);
@@ -274,7 +275,8 @@ export class StocksService {
 
   private extractChange(data: any): number {
     try {
-      return data?.summary?.price_change || data?.summary?.change || data?.change || 0;
+      // SerpApi Google Finance stores price movement in market.price_movement.value
+      return data?.summary?.market?.price_movement?.value || 0;
     } catch {
       return 0;
     }
@@ -282,7 +284,8 @@ export class StocksService {
 
   private extractChangePercent(data: any): number {
     try {
-      return data?.summary?.price_change_percentage || data?.summary?.change_percent || data?.change_percent || 0;
+      // SerpApi Google Finance stores percentage in market.price_movement.percentage
+      return data?.summary?.market?.price_movement?.percentage || 0;
     } catch {
       return 0;
     }

@@ -58,8 +58,23 @@ export class SerpApiService {
           hasSummary: !!result?.summary,
           summaryKeys: result?.summary ? Object.keys(result.summary) : [],
           priceValue: result?.summary?.price,
-          sampleData: JSON.stringify(result).slice(0, 200)
+          fullResponse: JSON.stringify(result, null, 2)
         });
+        
+        // Log specific data extraction attempts
+        if (result?.summary) {
+          this.logger.log(`[DEBUG] Price extraction attempts for ${symbol}:`, {
+            summaryPrice: result.summary.price,
+            summaryValue: result.summary.value,
+            summaryOpen: result.summary.open,
+            summaryClose: result.summary.close,
+            summaryLast: result.summary.last,
+            summaryPrevClose: result.summary.previous_close,
+            allSummaryData: result.summary
+          });
+        } else {
+          this.logger.error(`[DEBUG] No summary found in SerpApi response for ${symbol}`);
+        }
       }
 
       if (!result || !result.summary) {
@@ -82,7 +97,8 @@ export class SerpApiService {
           change: result?.summary?.price_change,
           marketCap: result?.summary?.market_cap,
           volume: result?.summary?.volume,
-          processingTime: `${Date.now() - startTime}ms`
+          processingTime: `${Date.now() - startTime}ms`,
+          successfulExtraction: !!(result?.summary?.price || result?.summary?.value || result?.summary?.close)
         });
       }
       return result;
