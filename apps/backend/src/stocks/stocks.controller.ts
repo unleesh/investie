@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { StocksService } from './stocks.service';
-import type { StockCardData, StockSymbol } from '@investie/types';
+import type { StockCardData, StockSymbol } from '../types';
 
 @Controller('api/v1/stocks')
 export class StocksController {

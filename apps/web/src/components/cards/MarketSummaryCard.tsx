@@ -1,7 +1,9 @@
+'use client';
+
 import React from 'react';
 import type { MarketSummaryData } from '@investie/types';
 import { Card } from '../ui/Card';
-import { FearGreedGauge } from '../charts/FearGreedGauge';
+import { SimpleGauge } from '../charts/SimpleGauge';
 import { SP500Sparkline } from '../charts/SP500Sparkline';
 
 interface MarketSummaryCardProps {
@@ -30,16 +32,21 @@ export const MarketSummaryCard: React.FC<MarketSummaryCardProps> = ({ data, isLo
   }
 
   return (
-    <Card>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Market Summary</h2>
-        <p className="text-sm text-gray-500 mt-1">Real-time market indicators with AI insights</p>
+    <Card className="bg-gradient-to-br from-white to-gray-50/50">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900">Market Summary</h2>
+        <p className="text-sm text-gray-600 mt-2">Real-time market indicators with AI insights</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Fear & Greed Index - Enhanced with Gauge */}
         <div className="md:col-span-1">
-          <FearGreedGauge data={data.fearGreedIndex} size={140} />
+          <SimpleGauge 
+            value={data.fearGreedIndex.value} 
+            size={140} 
+            status={data.fearGreedIndex.status}
+            title="Fear & Greed Index"
+          />
         </div>
 
         {/* S&P 500 Sparkline - Enhanced with Chart */}
@@ -56,15 +63,15 @@ export const MarketSummaryCard: React.FC<MarketSummaryCardProps> = ({ data, isLo
           <div className="text-3xl font-bold text-gray-900">{data.vix.value}</div>
           <div className="flex items-center justify-between">
             <span className={`text-sm font-medium uppercase px-2 py-1 rounded-full ${
-              data.vix.status === 'high' ? 'bg-red-100 text-red-700' :
-              data.vix.status === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+              data.vix.status.toLowerCase() === 'high' ? 'bg-red-100 text-red-700' :
+              data.vix.status.toLowerCase() === 'medium' ? 'bg-yellow-100 text-yellow-700' :
               'bg-green-100 text-green-700'
             }`}>
-              {data.vix.status} volatility
+              {data.vix.status.toLowerCase()} volatility
             </span>
             <div className="text-xs text-gray-500">
-              {data.vix.status === 'high' ? 'Market stress detected' :
-               data.vix.status === 'medium' ? 'Moderate uncertainty' :
+              {data.vix.status.toLowerCase() === 'high' ? 'Market stress detected' :
+               data.vix.status.toLowerCase() === 'medium' ? 'Moderate uncertainty' :
                'Low market fear'}
             </div>
           </div>

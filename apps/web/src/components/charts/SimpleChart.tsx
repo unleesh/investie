@@ -39,6 +39,7 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
   }).join(' ');
 
   const trendColor = trend === 'up' ? '#16a34a' : trend === 'down' ? '#dc2626' : '#6b7280';
+  const trendBgColor = trend === 'up' ? '#dcfce7' : trend === 'down' ? '#fef2f2' : '#f9fafb';
   const trendIcon = trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→';
 
   return (
@@ -52,7 +53,7 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
           </div>
         </div>
       )}
-      <div className="bg-white rounded border" style={{ width, height }}>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" style={{ width, height }}>
         <svg
           width="100%"
           height="100%"
@@ -60,18 +61,39 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
           preserveAspectRatio="none"
           className="block"
         >
+          {/* Background gradient */}
+          <defs>
+            <linearGradient id={`gradient-${trend}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={trendColor} stopOpacity="0.1"/>
+              <stop offset="100%" stopColor={trendColor} stopOpacity="0.05"/>
+            </linearGradient>
+          </defs>
+          
+          {/* Area fill */}
+          <polygon
+            fill={`url(#gradient-${trend})`}
+            points={`0,100 ${points} 100,100`}
+          />
+          
+          {/* Main line */}
           <polyline
             fill="none"
             stroke={trendColor}
-            strokeWidth="2"
+            strokeWidth="2.5"
             points={points}
             vectorEffect="non-scaling-stroke"
+            className="drop-shadow-sm"
           />
+          
+          {/* End point */}
           <circle
             cx={data.length > 1 ? ((data.length - 1) / (data.length - 1)) * 100 : 50}
             cy={data.length > 1 ? 100 - ((data[data.length - 1] - min) / range) * 100 : 50}
-            r="1.5"
-            fill={trendColor}
+            r="2"
+            fill="white"
+            stroke={trendColor}
+            strokeWidth="2"
+            className="drop-shadow-sm"
           />
         </svg>
       </div>

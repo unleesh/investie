@@ -1,6 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { MarketSummaryData } from '@investie/types';
-import { getMarketSummary } from '@investie/mock';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import type { MarketSummaryData } from '../types';
 import { FinancialDataService } from './financial-data.service';
 import { FearGreedService } from '../services/fear-greed.service';
 import { ClaudeService } from '../services/claude.service';
@@ -18,8 +17,19 @@ export class MarketService {
   ) {}
 
   async getSummary(): Promise<MarketSummaryData> {
+    const debugMode = process.env.DEBUG_MODE === 'true';
+    const startTime = Date.now();
+    
     try {
-      this.logger.log('Fetching enhanced market summary with AI components');
+      this.logger.log('🚀 [DEBUG] Fetching enhanced market summary with AI components');
+      
+      if (debugMode) {
+        this.logger.log('🔍 [DEBUG] API Keys Status:', {
+          fredKey: process.env.FRED_API_KEY ? `${process.env.FRED_API_KEY.slice(0, 8)}...` : 'NOT_SET',
+          serpApiKey: process.env.SERPAPI_API_KEY ? `${process.env.SERPAPI_API_KEY.slice(0, 8)}...` : 'NOT_SET',
+          claudeKey: process.env.CLAUDE_API_KEY ? `${process.env.CLAUDE_API_KEY.slice(0, 8)}...` : 'NOT_SET'
+        });
+      }
       
       const [economicData, marketData, fearGreedIndex] = await Promise.allSettled([
         this.financialDataService.getEconomicIndicators(),
@@ -27,15 +37,61 @@ export class MarketService {
         this.fearGreedService.getCurrentFearGreedIndex(),
       ]);
 
+      if (debugMode) {
+        this.logger.log('📊 [DEBUG] API Results Status:', {
+          economics: economicData.status,
+          markets: marketData.status,
+          fearGreed: fearGreedIndex.status,
+          economicsReason: economicData.status === 'rejected' ? economicData.reason?.message : 'success',
+          marketsReason: marketData.status === 'rejected' ? marketData.reason?.message : 'success',
+          fearGreedReason: fearGreedIndex.status === 'rejected' ? fearGreedIndex.reason?.message : 'success'
+        });
+      }
+
       const economics = economicData.status === 'fulfilled' ? economicData.value : null;
       const markets = marketData.status === 'fulfilled' ? marketData.value : null;
       const fearGreed = fearGreedIndex.status === 'fulfilled' ? fearGreedIndex.value : null;
 
       // Transform API data to MarketSummaryData format with AI enhancements
-      return this.transformToMarketSummary(economics, markets, fearGreed);
+      const result = await this.transformToMarketSummary(economics, markets, fearGreed);
+      
+      if (debugMode) {
+        const processingTime = Date.now() - startTime;
+        this.logger.log('✅ [DEBUG] Market Summary Complete:', {
+          processingTime: `${processingTime}ms`,
+          dataSource: {
+            economics: economics ? 'REAL_API' : 'FALLBACK_MOCK',
+            markets: markets ? 'REAL_API' : 'FALLBACK_MOCK',
+            fearGreed: fearGreed ? 'REAL_API' : 'FALLBACK_MOCK'
+          },
+          resultPreview: {
+            fearGreedValue: result.fearGreedIndex.value,
+            vixValue: result.vix.value,
+            interestRate: result.interestRate.value,
+            cpiValue: result.cpi.value
+          }
+        });
+      }
+      
+      return result;
     } catch (error) {
-      this.logger.error('Failed to fetch market data, falling back to mock data:', error.message);
-      return getMarketSummary();
+      this.logger.error('❌ [DEBUG] Failed to fetch market data - no fallback available:', error.message);
+      if (debugMode) {
+        this.logger.error('🚨 [DEBUG] Full Error Details:', {
+          error: error.message,
+          stack: error.stack,
+          processingTime: `${Date.now() - startTime}ms`
+        });
+      }
+      throw new HttpException(
+        {
+          message: 'Market data temporarily unavailable',
+          error: 'External API services are currently down',
+          statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+          retry: 'Please try again in a few moments'
+        },
+        HttpStatus.SERVICE_UNAVAILABLE
+      );
     }
   }
 
@@ -45,39 +101,46 @@ export class MarketService {
     fearGreedIndex?: any
   ): Promise<MarketSummaryData> {
     try {
-      const mockData = getMarketSummary();
+      // Require all essential data - no fallbacks to mock data
+      if (!economics || !markets || !fearGreedIndex) {
+        throw new Error('Essential market data missing - one or more API services failed');
+      }
 
       // Generate AI outlook for interest rates
       const aiOutlook = await this.generateInterestRateOutlook(economics?.interestRate);
 
       return {
-        fearGreedIndex: fearGreedIndex || mockData.fearGreedIndex,
+        fearGreedIndex: {
+          value: fearGreedIndex.value || 0,
+          status: fearGreedIndex.status || 'neutral',
+          source: fearGreedIndex.source || 'CNN Fear & Greed Index'
+        },
         vix: {
-          value: markets?.vix?.value || mockData.vix.value,
-          status: markets?.vix?.status || mockData.vix.status,
-          source: mockData.vix.source,
+          value: markets.vix?.value || 0,
+          status: markets.vix?.status || 'Low',
+          source: 'google_finance'
         },
         interestRate: {
-          value: economics?.interestRate?.value || mockData.interestRate.value,
-          aiOutlook, // Use AI-generated outlook
-          source: mockData.interestRate.source,
+          value: economics.interestRate?.value || 0,
+          aiOutlook,
+          source: 'fred_api'
         },
         cpi: {
-          value: economics?.cpi?.value || mockData.cpi.value,
-          monthOverMonth: economics?.cpi?.monthOverMonth || mockData.cpi.monthOverMonth,
-          direction: economics?.cpi?.direction || mockData.cpi.direction,
-          source: mockData.cpi.source,
+          value: economics.cpi?.value || 0,
+          monthOverMonth: economics.cpi?.monthOverMonth || 0,
+          direction: economics.cpi?.direction || 'stable',
+          source: 'fred_api'
         },
         unemploymentRate: {
-          value: economics?.unemploymentRate?.value || mockData.unemploymentRate.value,
-          monthOverMonth: economics?.unemploymentRate?.monthOverMonth || mockData.unemploymentRate.monthOverMonth,
-          source: mockData.unemploymentRate.source,
+          value: economics.unemploymentRate?.value || 0,
+          monthOverMonth: economics.unemploymentRate?.monthOverMonth || 0,
+          source: 'fred_api'
         },
-        sp500Sparkline: markets?.sp500?.sparkline || mockData.sp500Sparkline,
+        sp500Sparkline: markets.sp500?.sparkline || { data: [], weeklyTrend: 'flat', source: 'google_finance' }
       };
     } catch (error) {
       this.logger.error('Failed to transform market data:', error.message);
-      return getMarketSummary();
+      throw error; // Re-throw instead of falling back to mock data
     }
   }
 

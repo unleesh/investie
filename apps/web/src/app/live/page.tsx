@@ -11,6 +11,10 @@ export default function LivePage() {
   const { data: stocksData, loading: stocksLoading, error: stocksError } = useAllStocks();
   const { data: healthData } = useHealthCheck();
 
+  // Data flow status
+  const hasMarketData = marketData && !marketError;
+  const hasStocksData = stocksData && stocksData.length > 0 && !stocksError;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -113,7 +117,7 @@ export default function LivePage() {
               ) : stocksData && stocksData.length > 0 ? (
                 <div className="space-y-8">
                   {stocksData.slice(0, 5).map((stock) => (
-                    <StockCard key={stock.symbol} data={stock} />
+                    <StockCard key={stock.symbol} data={stock} isLoading={false} />
                   ))}
                 </div>
               ) : (

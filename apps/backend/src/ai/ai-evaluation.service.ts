@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { AIEvaluation, StockSymbol } from '@investie/types';
+import type { AIEvaluation, StockSymbol } from '../types';
 import { ClaudeService } from '../services/claude.service';
 import { CacheService } from '../cache/cache.service';
 

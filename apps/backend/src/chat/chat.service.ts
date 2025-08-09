@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { ChatMessage, ChatSession, StockSymbol } from '@investie/types';
+import type { ChatMessage, ChatSession, StockSymbol } from '../types';
 import { ClaudeService } from '../services/claude.service';
 import { CacheService } from '../cache/cache.service';
 
@@ -15,11 +15,15 @@ export class ChatService {
 
   async createSession(): Promise<ChatSession> {
     const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const timestamp = new Date().toISOString();
     const session: ChatSession = {
+      id: sessionId,
       sessionId,
       messages: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
       isActive: true,
-      lastActivity: new Date().toISOString(),
+      lastActivity: timestamp,
     };
 
     this.sessions.set(sessionId, session);
@@ -176,7 +180,7 @@ ${relatedSymbol ? `Focus stock: ${relatedSymbol}` : ''}`;
 
   async getRecentSessions(): Promise<ChatSession[]> {
     return Array.from(this.sessions.values())
-      .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime())
+      .sort((a, b) => new Date(b.lastActivity || b.updatedAt).getTime() - new Date(a.lastActivity || a.updatedAt).getTime())
       .slice(0, 10);
   }
 
@@ -218,7 +222,7 @@ ${relatedSymbol ? `Focus stock: ${relatedSymbol}` : ''}`;
     let cleaned = 0;
 
     for (const [sessionId, session] of this.sessions.entries()) {
-      if (!session.isActive && new Date(session.lastActivity).getTime() < cutoffTime) {
+      if (!session.isActive && new Date(session.lastActivity || session.updatedAt).getTime() < cutoffTime) {
         this.sessions.delete(sessionId);
         this.cacheService.delete(`chat:${sessionId}:context`);
         cleaned++;

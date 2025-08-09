@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import OpenAI from 'openai';
-import type { StockSymbol, StockNewsSummary } from '@investie/types';
+import type { StockSymbol, StockNewsSummary } from '../types';
 import { StockValidatorHelper, ValidationResult } from './stock-validator.helper';
 import { ClaudeService } from '../services/claude.service';
 import { CacheService } from '../cache/cache.service';

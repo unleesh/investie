@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { StockTechnicals } from '@investie/types';
+import type { StockTechnicals } from '../types';
 
 @Injectable()
 export class TechnicalAnalysisService {
@@ -201,6 +201,24 @@ export class TechnicalAnalysisService {
     } catch (error) {
       this.logger.error('Trend analysis failed:', error.message);
       return 'flat';
+    }
+  }
+
+  // API-first method for getting stock technical analysis
+  async getAnalysis(symbol: string): Promise<StockTechnicals | null> {
+    try {
+      this.logger.log(`[API-FIRST] Calculating technical analysis for ${symbol}`);
+      
+      // For now, return neutral RSI since we don't have real-time price data
+      // In a full implementation, this would fetch historical prices from SerpApi
+      // and calculate actual RSI values
+      return {
+        rsi: 50, // Neutral RSI value
+        rsiStatus: 'neutral' as const,
+      };
+    } catch (error) {
+      this.logger.error(`[API-FIRST] Failed to get technical analysis for ${symbol}:`, error.message);
+      return null;
     }
   }
 

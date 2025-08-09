@@ -16,9 +16,20 @@ export function useApi<T>(
 
   useEffect(() => {
     const fetchData = async () => {
+      const debugMode = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true';
+      const startTime = Date.now();
+      
       try {
         setLoading(true);
         setError(null);
+
+        if (debugMode) {
+          console.log('🚀 API Call Start:', {
+            endpoint,
+            url: `${API_BASE_URL}${endpoint}`,
+            timestamp: new Date().toISOString()
+          });
+        }
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
           ...options,
@@ -33,10 +44,42 @@ export function useApi<T>(
         }
 
         const result = await response.json();
+        
+        if (debugMode) {
+          const responseTime = Date.now() - startTime;
+          console.log('✅ API Call Success:', {
+            endpoint,
+            responseTime: `${responseTime}ms`,
+            dataSize: JSON.stringify(result).length,
+            isFromCache: responseTime < 100, // Likely cached if very fast
+            preview: endpoint.includes('market-summary') ? {
+              fearGreedValue: result.fearGreedIndex?.value,
+              vixValue: result.vix?.value,
+              sp500DataPoints: result.sp500Sparkline?.data?.length || result.sp500Sparkline?.length || 0,
+              isLikelyMockData: result.fearGreedIndex?.value === 40
+            } : endpoint.includes('stocks') ? {
+              firstStock: result[0]?.symbol || result.symbol,
+              stockCount: Array.isArray(result) ? result.length : 1,
+              hasAIEvaluation: !!(result[0]?.aiEvaluation || result.aiEvaluation)
+            } : 'other'
+          });
+        }
+        
         setData(result);
       } catch (err) {
+        const responseTime = Date.now() - startTime;
         setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('API Error:', err);
+        
+        if (debugMode) {
+          console.error('❌ API Call Failed:', {
+            endpoint,
+            error: err instanceof Error ? err.message : 'Unknown error',
+            responseTime: `${responseTime}ms`,
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          console.error('API Error:', err);
+        }
       } finally {
         setLoading(false);
       }

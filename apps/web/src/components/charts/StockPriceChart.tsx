@@ -58,7 +58,7 @@ export const StockPriceChart: React.FC<StockPriceChartProps> = ({
       </div>
 
       {/* Chart using SimpleChart fallback */}
-      <div className="bg-white border border-gray-100 rounded-lg p-2">
+      <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
         <SimpleChart
           data={priceData}
           height={height}

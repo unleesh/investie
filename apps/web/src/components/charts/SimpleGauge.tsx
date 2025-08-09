@@ -63,14 +63,21 @@ export const SimpleGauge: React.FC<SimpleGaugeProps> = ({
         <h3 className="text-sm font-medium text-gray-700">{title}</h3>
       )}
       
-      <div className="relative" style={{ width: size, height: size }}>
+      <div className="relative p-4 bg-white rounded-lg border border-gray-200 shadow-sm" style={{ width: size + 32, height: size + 32 }}>
         {/* Background Circle */}
         <svg
           width={size}
           height={size}
           viewBox="0 0 100 100"
-          className="transform -rotate-90"
+          className="transform -rotate-90 drop-shadow-sm"
         >
+          <defs>
+            <linearGradient id={`gauge-gradient-${value}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={color} stopOpacity="0.8"/>
+              <stop offset="100%" stopColor={color} stopOpacity="1"/>
+            </linearGradient>
+          </defs>
+          
           <circle
             cx="50"
             cy="50"
@@ -83,13 +90,14 @@ export const SimpleGauge: React.FC<SimpleGaugeProps> = ({
             cx="50"
             cy="50"
             r="40"
-            stroke={color}
+            stroke={`url(#gauge-gradient-${value})`}
             strokeWidth="8"
             fill="none"
             strokeDasharray={strokeDasharray}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            className="transition-all duration-300 ease-out"
+            className="transition-all duration-700 ease-out"
+            style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
           />
         </svg>
         

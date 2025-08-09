@@ -3,7 +3,7 @@ import { MarketService } from './market.service';
 import { MarketDataScheduler } from './market-data.scheduler';
 import { FinancialDataService } from './financial-data.service';
 import { CacheService } from '../cache/cache.service';
-import type { MarketSummaryData } from '@investie/types';
+import type { MarketSummaryData } from '../types';
 
 @Controller('api/v1/market-summary')
 export class MarketController {

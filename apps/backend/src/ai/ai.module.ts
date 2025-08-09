@@ -13,6 +13,7 @@ import { CacheModule } from '../cache/cache.module';
   ],
   exports: [
     AIEvaluationService,
+    ClaudeService,
     TechnicalAnalysisService,
   ],
 })

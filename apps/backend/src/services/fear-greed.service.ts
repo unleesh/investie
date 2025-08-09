@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ClaudeService } from './claude.service';
 import { CacheService } from '../cache/cache.service';
-import type { FearGreedIndex } from '@investie/types';
+import type { FearGreedIndex } from '../types';
 
 @Injectable()
 export class FearGreedService {
