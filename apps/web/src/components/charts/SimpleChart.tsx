@@ -1,0 +1,85 @@
+'use client';
+
+import React from 'react';
+
+interface SimpleChartProps {
+  data?: number[];
+  width?: number | string;
+  height?: number;
+  trend?: 'up' | 'down' | 'flat';
+  title?: string;
+  className?: string;
+}
+
+export const SimpleChart: React.FC<SimpleChartProps> = ({
+  data,
+  width = '100%',
+  height = 60,
+  trend = 'flat',
+  title,
+  className = ''
+}) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className={`${className} bg-gray-50 rounded border flex items-center justify-center`} style={{ width, height }}>
+        <span className="text-xs text-gray-400">No data</span>
+      </div>
+    );
+  }
+
+  // Simple SVG sparkline
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+
+  const points = data.map((value, index) => {
+    const x = (index / (data.length - 1)) * 100;
+    const y = 100 - ((value - min) / range) * 100;
+    return `${x},${y}`;
+  }).join(' ');
+
+  const trendColor = trend === 'up' ? '#16a34a' : trend === 'down' ? '#dc2626' : '#6b7280';
+  const trendIcon = trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→';
+
+  return (
+    <div className={`${className}`}>
+      {title && (
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-medium text-gray-700">{title}</span>
+          <div className="flex items-center space-x-1">
+            <span style={{ color: trendColor }}>{trendIcon}</span>
+            <span className="text-xs capitalize" style={{ color: trendColor }}>{trend}</span>
+          </div>
+        </div>
+      )}
+      <div className="bg-white rounded border" style={{ width, height }}>
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="block"
+        >
+          <polyline
+            fill="none"
+            stroke={trendColor}
+            strokeWidth="2"
+            points={points}
+            vectorEffect="non-scaling-stroke"
+          />
+          <circle
+            cx={data.length > 1 ? ((data.length - 1) / (data.length - 1)) * 100 : 50}
+            cy={data.length > 1 ? 100 - ((data[data.length - 1] - min) / range) * 100 : 50}
+            r="1.5"
+            fill={trendColor}
+          />
+        </svg>
+      </div>
+      <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <span>${min.toFixed(2)}</span>
+        <span>{data.length} points</span>
+        <span>${max.toFixed(2)}</span>
+      </div>
+    </div>
+  );
+};
