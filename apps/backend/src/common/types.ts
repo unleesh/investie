@@ -92,6 +92,7 @@ export interface StockNewsWithArticles {
   sentiment: 'positive' | 'neutral' | 'negative';
   source: string;
   articles: SerpApiNewsResult[];
+  query?: string;
 }
 
 export interface ValidationResult {

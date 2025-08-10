@@ -30,11 +30,19 @@ interface ProcessNewsResponse {
       headline: string;
       sentiment: 'positive' | 'neutral' | 'negative';
       articles: NewsArticle[];
+      query?: string;
+      fetchedAt: string;
+      totalArticles: number;
+      dateRange?: {
+        oldest: string;
+        newest: string;
+      };
     };
     macroNews?: {
       topHeadline: string;
       articles: NewsArticle[];
       totalArticles: number;
+      fetchedAt: string;
     };
     validationResult?: {
       isValid: boolean;
@@ -61,11 +69,19 @@ interface NewsResponse {
     headline: string;
     sentiment: 'positive' | 'neutral' | 'negative';
     articles: NewsArticle[];
+    query?: string;
+    fetchedAt: string;
+    totalArticles: number;
+    dateRange?: {
+      oldest: string;
+      newest: string;
+    };
   };
   macroNews?: {
     topHeadline: string;
     articles: NewsArticle[];
     totalArticles: number;
+    fetchedAt: string;
   };
   validationResult?: {
     isValid: boolean;
@@ -80,6 +96,50 @@ export class NewsController {
   private readonly logger = new Logger(NewsController.name);
 
   constructor(private readonly newsService: NewsService) {}
+
+  // Helper method to calculate date range from articles
+  private calculateDateRange(articles: NewsArticle[]): { oldest: string; newest: string } | undefined {
+    if (!articles || articles.length === 0) return undefined;
+
+    const dates = articles
+      .map(article => new Date(article.date))
+      .filter(date => !isNaN(date.getTime()))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    if (dates.length === 0) return undefined;
+
+    return {
+      oldest: dates[0].toISOString(),
+      newest: dates[dates.length - 1].toISOString()
+    };
+  }
+
+  // Helper method to transform stockNews response
+  private transformStockNews(stockNews: any, currentTime: string) {
+    if (!stockNews) return undefined;
+
+    return {
+      headline: stockNews.headline,
+      sentiment: stockNews.sentiment,
+      articles: stockNews.articles,
+      query: stockNews.query,
+      fetchedAt: currentTime,
+      totalArticles: stockNews.articles?.length || 0,
+      dateRange: this.calculateDateRange(stockNews.articles)
+    };
+  }
+
+  // Helper method to transform macroNews response
+  private transformMacroNews(macroNews: any, currentTime: string) {
+    if (!macroNews) return undefined;
+
+    return {
+      topHeadline: macroNews.topHeadline,
+      articles: macroNews.articles,
+      totalArticles: macroNews.totalArticles,
+      fetchedAt: currentTime
+    };
+  }
 
   @Post('process')
   async processStockNews(@Body() request: ProcessNewsRequest): Promise<ProcessNewsResponse> {
@@ -109,13 +169,14 @@ export class NewsController {
       }
 
       // Return success response
+      const currentTime = new Date().toISOString();
       return {
         success: true,
         data: {
           symbol: result.symbol!,
           overview: result.overview,
-          stockNews: result.stockNews,
-          macroNews: result.macroNews,
+          stockNews: this.transformStockNews(result.stockNews, currentTime),
+          macroNews: this.transformMacroNews(result.macroNews, currentTime),
           validationResult: result.validationResult
         }
       };
@@ -154,13 +215,15 @@ export class NewsController {
         );
       }
 
+      const currentTime = new Date().toISOString();
+
       return {
         symbol: result.symbol!,
         overview: result.overview,
-        stockNews: result.stockNews,
-        macroNews: result.macroNews,
+        stockNews: this.transformStockNews(result.stockNews, currentTime),
+        macroNews: this.transformMacroNews(result.macroNews, currentTime),
         validationResult: result.validationResult,
-        timestamp: new Date().toISOString()
+        timestamp: currentTime
       };
 
     } catch (error) {

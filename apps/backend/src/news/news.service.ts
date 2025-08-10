@@ -59,15 +59,12 @@ export class NewsService {
       }
 
       // Step 5: Load or fetch stock-specific news
-      let stockNewsData: { summary: StockNewsSummary; articles: SerpApiNewsResult[] } | null = null;
+      let stockNewsData: { summary: StockNewsSummary; articles: SerpApiNewsResult[]; query?: string } | null = null;
       if (!this.hasTodaysStockNews(symbol, today)) {
         stockNewsData = await this.loadStockNews(symbol, today);
-        if (stockNewsData) this.storeStockNews(stockNewsData.summary, symbol, today);
+        if (stockNewsData) this.storeStockNews(stockNewsData, symbol, today);
       } else {
-        const storedSummary = this.loadStoredStockNews(symbol, today);
-        if (storedSummary) {
-          stockNewsData = { summary: storedSummary, articles: [] };
-        }
+        stockNewsData = this.loadStoredStockNews(symbol, today);
       }
 
       // Step 6: Generate comprehensive AI overview
@@ -82,7 +79,8 @@ export class NewsService {
             headline: stockNewsData.summary.headline,
             sentiment: stockNewsData.summary.sentiment,
             source: stockNewsData.summary.source,
-            articles: stockNewsData.articles 
+            articles: stockNewsData.articles,
+            query: stockNewsData.query
           } : undefined,
           macroNews: macroNews || undefined,
           validationResult 
@@ -131,7 +129,7 @@ export class NewsService {
     }
   }
 
-  async loadStockNews(symbol: StockSymbol, date: string): Promise<{ summary: StockNewsSummary; articles: SerpApiNewsResult[] } | null> {
+  async loadStockNews(symbol: StockSymbol, date: string): Promise<{ summary: StockNewsSummary; articles: SerpApiNewsResult[]; query?: string } | null> {
     if (!this.serpApiKey) {
       this.logger.warn('SerpAPI key not configured, using mock data');
       const mockSummary = this.getMockStockNews(symbol);
@@ -139,30 +137,90 @@ export class NewsService {
     }
 
     try {
-      // Company name mapping for better search results
-      const companyMap: Record<string, string> = {
-        AAPL: 'Apple', TSLA: 'Tesla', MSFT: 'Microsoft', GOOGL: 'Google Alphabet',
-        AMZN: 'Amazon', NVDA: 'NVIDIA', META: 'Meta Facebook', NFLX: 'Netflix'
-      };
+      // Get full company name for better search results
+      const companyName = await this.getCompanyName(symbol);
+      
+      // Create multiple dynamic search queries for better news coverage
+      const searchQueries = [
+        `"${companyName}" trending news latest updates breakthrough`,
+        `"${companyName}" ${symbol} earnings announcement upcoming quarterly`,
+        `"${companyName}" stock analysis investment forecast predictions`,
+        `"${companyName}" innovation product launch developments`,
+        `${companyName} ${symbol} news today market performance stock price`
+      ];
 
-      const companyName = companyMap[symbol] || symbol;
-      const query = `${companyName} ${symbol} stock`;
+      this.logger.log(`🔍 Starting enhanced search for ${symbol} (${companyName})`);
+      this.logger.log(`🔍 Search queries prepared: ${searchQueries.length} variants`);
 
-      const response = await axios.get('https://serpapi.com/search', {
-        params: {
-          engine: 'google_news',
-          q: query,
-          gl: 'us', hl: 'en', num: 10,
-          api_key: this.serpApiKey,
-        },
-        timeout: 15000,
-      });
+      // Try queries until we get good results
+      let newsResults: any[] = [];
+      let selectedQuery = '';
 
-      const newsResults = response.data.news_results;
-      if (!newsResults?.length) return null;
+      for (const query of searchQueries) {
+        this.logger.log(`Trying search query: "${query}"`);
+        
+        try {
+          const response = await axios.get('https://serpapi.com/search', {
+            params: {
+              engine: 'google_news',
+              q: query,
+              gl: 'us', 
+              hl: 'en', 
+              num: 25,
+              api_key: this.serpApiKey,
+            },
+            timeout: 15000,
+          });
 
-      const topHeadline = newsResults[0].title || `${symbol} stock news`;
+          if (response.data.news_results?.length > 5) {
+            newsResults = response.data.news_results;
+            selectedQuery = query;
+            this.logger.log(`Success with query: "${query}" - ${newsResults.length} articles found`);
+            break;
+          }
+        } catch (queryError) {
+          this.logger.warn(`Query failed: "${query}" - ${queryError.message}`);
+          continue;
+        }
+      }
+
+      // If we still don't have enough results, try a simple fallback
+      if (newsResults.length < 5) {
+        this.logger.log(`Limited results (${newsResults.length}), trying fallback search`);
+        
+        try {
+          const fallbackQuery = `"${companyName}" ${symbol}`;
+          const fallbackResponse = await axios.get('https://serpapi.com/search', {
+            params: {
+              engine: 'google_news',
+              q: fallbackQuery,
+              gl: 'us', 
+              hl: 'en', 
+              num: 15,
+              api_key: this.serpApiKey,
+            },
+            timeout: 15000,
+          });
+          
+          if (fallbackResponse.data.news_results?.length > newsResults.length) {
+            newsResults = fallbackResponse.data.news_results;
+            selectedQuery = fallbackQuery;
+            this.logger.log(`Fallback search found ${newsResults.length} articles`);
+          }
+        } catch (fallbackError) {
+          this.logger.warn(`Fallback search failed: ${fallbackError.message}`);
+        }
+      }
+
+      if (!newsResults || newsResults.length === 0) {
+        this.logger.warn(`No news results found for ${symbol}`);
+        return null;
+      }
+
+      const topHeadline = newsResults[0].title || `${companyName} trending news`;
       const sentiment = await this.analyzeSentiment(topHeadline, newsResults.slice(0, 3));
+
+      this.logger.log(`Final query used: "${selectedQuery}" - ${newsResults.length} articles returned`);
 
       const summary: StockNewsSummary = {
         headline: topHeadline,
@@ -172,7 +230,8 @@ export class NewsService {
 
       return {
         summary,
-        articles: newsResults
+        articles: newsResults,
+        query: selectedQuery
       };
     } catch (error) {
       this.logger.error(`Failed to load stock news for ${symbol}: ${error.message}`);
@@ -250,6 +309,51 @@ Respond with only one word: positive, neutral, or negative
   }
 
   // Private helper methods
+  private async getCompanyName(symbol: StockSymbol): Promise<string> {
+    // Check cache first (24-hour TTL for company names - they don't change often)
+    const cacheKey = `company_name:${symbol}`;
+    const cached = await this.cacheManager.get<string>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Try Yahoo Finance API first - it's free and reliable
+      const response = await axios.get(`https://query1.finance.yahoo.com/v1/finance/search`, {
+        params: { q: symbol, quotesCount: 1, newsCount: 0 },
+        timeout: 10000,
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Investie/1.0)' }
+      });
+
+      if (response.data?.quotes?.[0]?.longname || response.data?.quotes?.[0]?.shortname) {
+        const companyName = response.data.quotes[0].longname || response.data.quotes[0].shortname;
+        // Cache for 24 hours
+        await this.cacheManager.set(cacheKey, companyName, 86400000);
+        this.logger.log(`Found company name for ${symbol}: ${companyName}`);
+        return companyName;
+      }
+    } catch (error) {
+      this.logger.warn(`Yahoo Finance API failed for ${symbol}: ${error.message}`);
+    }
+
+    // Fallback to enhanced static mapping
+    const enhancedCompanyMap: Record<string, string> = {
+      AAPL: 'Apple Inc',
+      TSLA: 'Tesla Inc', 
+      MSFT: 'Microsoft Corporation',
+      GOOGL: 'Alphabet Inc',
+      AMZN: 'Amazon.com Inc',
+      NVDA: 'NVIDIA Corporation',
+      META: 'Meta Platforms Inc',
+      NFLX: 'Netflix Inc',
+      AVGO: 'Broadcom Inc',
+      AMD: 'Advanced Micro Devices Inc'
+    };
+
+    const fallbackName = enhancedCompanyMap[symbol] || symbol;
+    // Cache fallback for 1 hour (shorter TTL since it might not be accurate)
+    await this.cacheManager.set(cacheKey, fallbackName, 3600000);
+    return fallbackName;
+  }
+
   private async analyzeWithClaude(symbol: StockSymbol, stockNews: StockNewsSummary | null, stockArticles: SerpApiNewsResult[], macroNews: MacroNewsData | null): Promise<StockOverview | null> {
     try {
       const prompt = this.buildAnalysisPrompt(symbol, stockNews, stockArticles, macroNews);
@@ -282,16 +386,39 @@ Respond with only one word: positive, neutral, or negative
   }
 
   private buildAnalysisPrompt(symbol: StockSymbol, stockNews: StockNewsSummary | null, stockArticles: SerpApiNewsResult[], macroNews: MacroNewsData | null): string {
-    let prompt = `Analyze ${symbol} stock for investment recommendation based on the following news data:\n\n`;
+    const currentDate = new Date().toISOString().split('T')[0];
+    let prompt = `Analyze ${symbol} stock for investment recommendation based on the following comprehensive news data (Analysis Date: ${currentDate}):\n\n`;
 
     if (stockNews) {
       prompt += `COMPANY-SPECIFIC NEWS:\n- Headline: ${stockNews.headline}\n- Source: ${stockNews.source}\n`;
       
-      // Add article content if available
+      // Add ALL article titles and content with timing analysis
       if (stockArticles && stockArticles.length > 0) {
-        prompt += `\nRecent Articles:\n`;
-        stockArticles.slice(0, 3).forEach((article, index) => {
-          prompt += `${index + 1}. "${article.title}"\n`;
+        prompt += `\nAll Recent Articles (${stockArticles.length} total):\n`;
+        
+        // Calculate article recency
+        const articlesByRecency = stockArticles.map(article => {
+          const articleDate = new Date(article.date);
+          const daysDiff = Math.floor((Date.now() - articleDate.getTime()) / (1000 * 60 * 60 * 24));
+          return { ...article, daysAgo: daysDiff };
+        }).sort((a, b) => a.daysAgo - b.daysAgo);
+
+        // Show ALL article titles with timing information
+        prompt += `\nArticle Headlines (with timing):\n`;
+        articlesByRecency.forEach((article, index) => {
+          const recencyText = article.daysAgo === 0 ? 'Today' : 
+                             article.daysAgo === 1 ? '1 day ago' : 
+                             `${article.daysAgo} days ago`;
+          prompt += `${index + 1}. "${article.title}" (${recencyText} - ${article.date})\n`;
+        });
+        
+        // Add detailed content for most recent articles
+        prompt += `\nDetailed Content (Most Recent Articles):\n`;
+        articlesByRecency.slice(0, 5).forEach((article, index) => {
+          const recencyText = article.daysAgo === 0 ? 'Today' : 
+                             article.daysAgo === 1 ? '1 day ago' : 
+                             `${article.daysAgo} days ago`;
+          prompt += `${index + 1}. "${article.title}" (${recencyText})\n`;
           if (article.snippet) {
             prompt += `   Content: ${article.snippet}\n`;
           }
@@ -302,8 +429,13 @@ Respond with only one word: positive, neutral, or negative
 
     if (macroNews?.articles && macroNews.articles.length > 0) {
       prompt += `\nMARKET & ECONOMIC NEWS:\n- Top Headline: ${macroNews.topHeadline}\n\nKey Market Articles:\n`;
-      macroNews.articles.slice(0, 3).forEach((article, index) => {
-        prompt += `${index + 1}. "${article.title}"\n`;
+      macroNews.articles.slice(0, 5).forEach((article, index) => {
+        const articleDate = new Date(article.date);
+        const daysDiff = Math.floor((Date.now() - articleDate.getTime()) / (1000 * 60 * 60 * 24));
+        const recencyText = daysDiff === 0 ? 'Today' : 
+                           daysDiff === 1 ? '1 day ago' : 
+                           `${daysDiff} days ago`;
+        prompt += `${index + 1}. "${article.title}" (${recencyText})\n`;
         if (article.snippet) {
           prompt += `   Content: ${article.snippet}\n`;
         }
@@ -312,15 +444,25 @@ Respond with only one word: positive, neutral, or negative
     }
 
     return prompt + `
-Based on this comprehensive news analysis with article content, provide an investment assessment for ${symbol} in JSON format:
+Based on this comprehensive time-aware news analysis with ALL ${stockArticles.length} article headlines and recency information, provide an investment assessment for ${symbol} in JSON format:
 
-Focus on:
-- Specific company developments and performance indicators from article content
-- Market conditions and economic factors from recent news
-- Industry trends and competitive dynamics mentioned
-- Risk factors and concerns highlighted in articles
-- Growth opportunities or strategic initiatives discussed
-- Overall news narrative and its potential stock price impact`;
+CRITICAL TIMING CONSIDERATIONS:
+- Analyze the recency of news (today's news vs older articles)
+- Consider the momentum and frequency of recent vs older news
+- Weight more recent developments more heavily in your analysis
+- Identify if there's a trend acceleration or deceleration in news sentiment over time
+
+IMPORTANT: Consider ALL ${stockArticles.length} article headlines in your analysis for:
+- Overall sentiment and narrative themes across time periods
+- Company-specific developments and their timing
+- Market conditions and economic factors with recency weighting
+- Industry trends and competitive dynamics evolution
+- Risk factors and concerns, especially recent ones
+- Growth opportunities or strategic initiatives and their timing
+- Frequency and consistency of positive/negative themes across different time periods
+- Overall news momentum and timing patterns for stock price impact predictions
+
+Generate keyFactors that reflect insights from the complete set of articles with emphasis on timing and recency patterns.`;
   }
 
   private generateBasicOverview(symbol: StockSymbol, stockNews: StockNewsSummary | null, macroNews: MacroNewsData | null): StockOverview {
@@ -410,15 +552,20 @@ Focus on:
     fs.writeFileSync(path.join(macroDir, 'macro_news.json'), JSON.stringify(storeData, null, 2));
   }
 
-  private storeStockNews(stockNews: StockNewsSummary, symbol: StockSymbol, date: string): void {
+  private storeStockNews(stockNewsData: { summary: StockNewsSummary; articles: SerpApiNewsResult[]; query?: string }, symbol: StockSymbol, date: string): void {
     const stockDir = path.join(this.stockNewsDir, symbol, date);
     this.ensureDirectoryExists(stockDir);
 
     const storeData = {
       symbol, date, timestamp: new Date().toISOString(),
-      query: `${symbol} stock`,
-      summary: { headline: stockNews.headline, source: stockNews.source },
-      metadata: { source: stockNews.source, cached: false }
+      query: stockNewsData.query || `${symbol} enhanced search`,
+      summary: { 
+        headline: stockNewsData.summary.headline, 
+        sentiment: stockNewsData.summary.sentiment,
+        source: stockNewsData.summary.source 
+      },
+      articles: stockNewsData.articles,
+      metadata: { source: stockNewsData.summary.source, cached: false }
     };
 
     fs.writeFileSync(path.join(stockDir, 'stock_news.json'), JSON.stringify(storeData, null, 2));
@@ -446,14 +593,18 @@ Focus on:
     }
   }
 
-  private loadStoredStockNews(symbol: StockSymbol, date: string): StockNewsSummary | null {
+  private loadStoredStockNews(symbol: StockSymbol, date: string): { summary: StockNewsSummary; articles: SerpApiNewsResult[]; query?: string } | null {
     try {
       const stockPath = path.join(this.stockNewsDir, symbol, date, 'stock_news.json');
       const data = JSON.parse(fs.readFileSync(stockPath, 'utf8'));
       return {
-        headline: data.summary.headline,
-        sentiment: 'neutral', // Would be stored/calculated
-        source: data.summary.source
+        summary: {
+          headline: data.summary.headline,
+          sentiment: data.summary.sentiment || 'neutral',
+          source: data.summary.source
+        },
+        articles: data.articles || [],
+        query: data.query
       };
     } catch (error) {
       return null;
