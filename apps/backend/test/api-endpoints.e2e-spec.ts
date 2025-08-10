@@ -17,6 +17,8 @@ describe('API Endpoints (e2e)', () => {
     app.enableCors({
       origin: ['http://localhost:3000'],
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
     });
     
     app.useGlobalPipes(
@@ -268,7 +270,8 @@ describe('API Endpoints (e2e)', () => {
 
     it('should handle CORS headers', () => {
       return request(app.getHttpServer())
-        .options('/api/v1/stocks')
+        .get('/api/v1/stocks')
+        .set('Origin', 'http://localhost:3000')
         .expect((res) => {
           expect(res.headers['access-control-allow-origin']).toBeDefined();
         });

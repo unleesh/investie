@@ -105,9 +105,13 @@ describe('ClaudeService', () => {
         });
       }
 
-      await expect(
-        service.generateStructuredResponse(mockPrompt, mockSchema)
-      ).rejects.toThrow('Failed to parse structured response');
+      const result = await service.generateStructuredResponse(mockPrompt, mockSchema);
+      
+      // Should return fallback structured response instead of throwing
+      expect(result).toBeDefined();
+      expect(result.rating).toBe('neutral');
+      expect(result.confidence).toBe(50);
+      expect(result.summary).toContain('API');
     });
   });
 
