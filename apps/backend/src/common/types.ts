@@ -80,9 +80,18 @@ export interface NewsProcessingResult {
   isValid: boolean;
   symbol?: StockSymbol;
   overview?: StockOverview;
+  stockNews?: StockNewsWithArticles;
+  macroNews?: MacroNewsData;
   validationResult?: ValidationResult;
   error?: string;
   suggestions?: string[];
+}
+
+export interface StockNewsWithArticles {
+  headline: string;
+  sentiment: 'positive' | 'neutral' | 'negative';
+  source: string;
+  articles: SerpApiNewsResult[];
 }
 
 export interface ValidationResult {

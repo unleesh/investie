@@ -59,19 +59,34 @@ export class NewsService {
       }
 
       // Step 5: Load or fetch stock-specific news
-      let stockNews: StockNewsSummary | null = null;
+      let stockNewsData: { summary: StockNewsSummary; articles: SerpApiNewsResult[] } | null = null;
       if (!this.hasTodaysStockNews(symbol, today)) {
-        stockNews = await this.loadStockNews(symbol, today);
-        if (stockNews) this.storeStockNews(stockNews, symbol, today);
+        stockNewsData = await this.loadStockNews(symbol, today);
+        if (stockNewsData) this.storeStockNews(stockNewsData.summary, symbol, today);
       } else {
-        stockNews = this.loadStoredStockNews(symbol, today);
+        const storedSummary = this.loadStoredStockNews(symbol, today);
+        if (storedSummary) {
+          stockNewsData = { summary: storedSummary, articles: [] };
+        }
       }
 
       // Step 6: Generate comprehensive AI overview
-      const overview = await this.generateOverview(symbol, stockNews, macroNews);
+      const overview = await this.generateOverview(symbol, stockNewsData?.summary || null, stockNewsData?.articles || [], macroNews);
       if (overview) {
         this.storeOverview(overview, symbol, today);
-        return { isValid: true, symbol, overview, validationResult };
+        return { 
+          isValid: true, 
+          symbol, 
+          overview, 
+          stockNews: stockNewsData ? { 
+            headline: stockNewsData.summary.headline,
+            sentiment: stockNewsData.summary.sentiment,
+            source: stockNewsData.summary.source,
+            articles: stockNewsData.articles 
+          } : undefined,
+          macroNews: macroNews || undefined,
+          validationResult 
+        };
       }
 
       return { isValid: false, error: 'Failed to generate investment overview' };
@@ -116,10 +131,11 @@ export class NewsService {
     }
   }
 
-  async loadStockNews(symbol: StockSymbol, date: string): Promise<StockNewsSummary | null> {
+  async loadStockNews(symbol: StockSymbol, date: string): Promise<{ summary: StockNewsSummary; articles: SerpApiNewsResult[] } | null> {
     if (!this.serpApiKey) {
       this.logger.warn('SerpAPI key not configured, using mock data');
-      return this.getMockStockNews(symbol);
+      const mockSummary = this.getMockStockNews(symbol);
+      return mockSummary ? { summary: mockSummary, articles: [] } : null;
     }
 
     try {
@@ -148,20 +164,26 @@ export class NewsService {
       const topHeadline = newsResults[0].title || `${symbol} stock news`;
       const sentiment = await this.analyzeSentiment(topHeadline, newsResults.slice(0, 3));
 
-      return {
+      const summary: StockNewsSummary = {
         headline: topHeadline,
         sentiment,
         source: 'google_news + claude_ai',
       };
+
+      return {
+        summary,
+        articles: newsResults
+      };
     } catch (error) {
       this.logger.error(`Failed to load stock news for ${symbol}: ${error.message}`);
-      return this.getMockStockNews(symbol);
+      const mockSummary = this.getMockStockNews(symbol);
+      return mockSummary ? { summary: mockSummary, articles: [] } : null;
     }
   }
 
-  async generateOverview(symbol: StockSymbol, stockNews: StockNewsSummary | null, macroNews: MacroNewsData | null): Promise<StockOverview | null> {
+  async generateOverview(symbol: StockSymbol, stockNews: StockNewsSummary | null, stockArticles: SerpApiNewsResult[], macroNews: MacroNewsData | null): Promise<StockOverview | null> {
     // Try Claude AI first (most sophisticated)
-    const claudeResult = await this.analyzeWithClaude(symbol, stockNews, macroNews);
+    const claudeResult = await this.analyzeWithClaude(symbol, stockNews, stockArticles, macroNews);
     if (claudeResult) return claudeResult;
 
     // Final fallback to rule-based analysis
@@ -228,9 +250,9 @@ Respond with only one word: positive, neutral, or negative
   }
 
   // Private helper methods
-  private async analyzeWithClaude(symbol: StockSymbol, stockNews: StockNewsSummary | null, macroNews: MacroNewsData | null): Promise<StockOverview | null> {
+  private async analyzeWithClaude(symbol: StockSymbol, stockNews: StockNewsSummary | null, stockArticles: SerpApiNewsResult[], macroNews: MacroNewsData | null): Promise<StockOverview | null> {
     try {
-      const prompt = this.buildAnalysisPrompt(symbol, stockNews, macroNews);
+      const prompt = this.buildAnalysisPrompt(symbol, stockNews, stockArticles, macroNews);
       const schema = `{
         "overview": "2-3 sentence analysis of the stock's outlook based on the news",
         "recommendation": "BUY|HOLD|SELL",
@@ -259,29 +281,46 @@ Respond with only one word: positive, neutral, or negative
     }
   }
 
-  private buildAnalysisPrompt(symbol: StockSymbol, stockNews: StockNewsSummary | null, macroNews: MacroNewsData | null): string {
+  private buildAnalysisPrompt(symbol: StockSymbol, stockNews: StockNewsSummary | null, stockArticles: SerpApiNewsResult[], macroNews: MacroNewsData | null): string {
     let prompt = `Analyze ${symbol} stock for investment recommendation based on the following news data:\n\n`;
 
     if (stockNews) {
       prompt += `COMPANY-SPECIFIC NEWS:\n- Headline: ${stockNews.headline}\n- Source: ${stockNews.source}\n`;
+      
+      // Add article content if available
+      if (stockArticles && stockArticles.length > 0) {
+        prompt += `\nRecent Articles:\n`;
+        stockArticles.slice(0, 3).forEach((article, index) => {
+          prompt += `${index + 1}. "${article.title}"\n`;
+          if (article.snippet) {
+            prompt += `   Content: ${article.snippet}\n`;
+          }
+          prompt += `   Source: ${article.source}\n\n`;
+        });
+      }
     }
 
     if (macroNews?.articles && macroNews.articles.length > 0) {
-      prompt += `MARKET & ECONOMIC NEWS:\n- Top Headline: ${macroNews.topHeadline}\n`;
-      macroNews.articles.slice(0, 5).forEach((article, index) => {
-        prompt += `  ${index + 1}. ${article.title}\n`;
+      prompt += `\nMARKET & ECONOMIC NEWS:\n- Top Headline: ${macroNews.topHeadline}\n\nKey Market Articles:\n`;
+      macroNews.articles.slice(0, 3).forEach((article, index) => {
+        prompt += `${index + 1}. "${article.title}"\n`;
+        if (article.snippet) {
+          prompt += `   Content: ${article.snippet}\n`;
+        }
+        prompt += `   Source: ${article.source}\n\n`;
       });
     }
 
     return prompt + `
-Based on this news analysis, provide an investment assessment for ${symbol} in JSON format:
+Based on this comprehensive news analysis with article content, provide an investment assessment for ${symbol} in JSON format:
 
 Focus on:
-- Company performance indicators from news
-- Market conditions and economic factors
-- Industry trends
-- Risk factors mentioned in news
-- Growth opportunities or concerns`;
+- Specific company developments and performance indicators from article content
+- Market conditions and economic factors from recent news
+- Industry trends and competitive dynamics mentioned
+- Risk factors and concerns highlighted in articles
+- Growth opportunities or strategic initiatives discussed
+- Overall news narrative and its potential stock price impact`;
   }
 
   private generateBasicOverview(symbol: StockSymbol, stockNews: StockNewsSummary | null, macroNews: MacroNewsData | null): StockOverview {
