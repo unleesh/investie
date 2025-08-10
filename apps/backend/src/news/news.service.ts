@@ -77,7 +77,6 @@ export class NewsService {
           overview, 
           stockNews: stockNewsData ? { 
             headline: stockNewsData.summary.headline,
-            sentiment: stockNewsData.summary.sentiment,
             source: stockNewsData.summary.source,
             articles: stockNewsData.articles,
             query: stockNewsData.query
@@ -101,10 +100,11 @@ export class NewsService {
     }
 
     try {
+      const macroQuery = 'stock market economy finance business';
       const response = await axios.get('https://serpapi.com/search', {
         params: {
           engine: 'google_news',
-          q: 'stock market economy finance business',
+          q: macroQuery,
           gl: 'us',
           hl: 'en',
           num: 75,
@@ -116,12 +116,36 @@ export class NewsService {
       const newsResults = response.data.news_results;
       if (!newsResults?.length) return null;
 
+      // Filter out articles that are too old (older than 30 days) as a backup
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const filteredResults = newsResults.filter(article => {
+        if (!article.date) return true; // Keep if no date info
+        
+        try {
+          // Parse the article date (format: "MM/dd/yyyy, hh:mm AM/PM, +0000 UTC")
+          const dateParts = article.date.split(', ');
+          if (dateParts.length >= 2) {
+            const articleDate = new Date(dateParts[0] + ', ' + dateParts[1]);
+            return articleDate >= thirtyDaysAgo;
+          }
+          return true; // Keep if we can't parse properly
+        } catch (error) {
+          // If we can't parse the date, keep the article
+          return true;
+        }
+      });
+      
+      this.logger.log(`[Macro News] Filtered out old articles: ${newsResults.length} -> ${filteredResults.length}`);
+
       return {
-        topHeadline: newsResults[0].title || 'Market news',
-        articles: newsResults,
-        totalArticles: newsResults.length,
+        topHeadline: filteredResults[0]?.title || 'Market news',
+        articles: filteredResults,
+        totalArticles: filteredResults.length,
         source: 'serpapi_google_news',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        query: macroQuery
       };
     } catch (error) {
       this.logger.error(`Failed to load macro news: ${error.message}`);
@@ -140,13 +164,13 @@ export class NewsService {
       // Get full company name for better search results
       const companyName = await this.getCompanyName(symbol);
       
-      // Create multiple dynamic search queries for better news coverage
+      // Create shorter, more generic search queries for better coverage
       const searchQueries = [
-        `"${companyName}" trending news latest updates breakthrough`,
-        `"${companyName}" ${symbol} earnings announcement upcoming quarterly`,
-        `"${companyName}" stock analysis investment forecast predictions`,
-        `"${companyName}" innovation product launch developments`,
-        `${companyName} ${symbol} news today market performance stock price`
+        `${symbol} news`,
+        `${companyName} stock`,
+        `${symbol} earnings`,
+        `${companyName} today`,
+        `${symbol} trending news`
       ];
 
       this.logger.log(`🔍 Starting enhanced search for ${symbol} (${companyName})`);
@@ -212,20 +236,63 @@ export class NewsService {
         }
       }
 
+      // Filter out articles that are too old (older than 30 days) as a backup
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const filteredResults = newsResults.filter(article => {
+        if (!article.date) return true; // Keep if no date info
+        
+        try {
+          // Parse the article date - try multiple formats
+          let articleDate: Date | null = null;
+          
+          if (article.date.includes(',')) {
+            // Format: "MM/dd/yyyy, hh:mm AM/PM, +0000 UTC"
+            const dateParts = article.date.split(', ');
+            if (dateParts.length >= 2) {
+              articleDate = new Date(dateParts[0] + ', ' + dateParts[1]);
+            }
+          }
+          
+          if (!articleDate || isNaN(articleDate.getTime())) {
+            // Try parsing the full date string
+            articleDate = new Date(article.date);
+          }
+          
+          if (!articleDate || isNaN(articleDate.getTime())) {
+            // Keep article if we can't parse the date
+            return true;
+          }
+          
+          return articleDate >= thirtyDaysAgo;
+        } catch (error) {
+          // If we can't parse the date, keep the article
+          return true;
+        }
+      });
+      
+      this.logger.log(`Filtered out old articles: ${newsResults.length} -> ${filteredResults.length}`);
+      newsResults = filteredResults;
+
       if (!newsResults || newsResults.length === 0) {
         this.logger.warn(`No news results found for ${symbol}`);
         return null;
       }
 
-      const topHeadline = newsResults[0].title || `${companyName} trending news`;
-      const sentiment = await this.analyzeSentiment(topHeadline, newsResults.slice(0, 3));
+      // Debug: Log some article dates to understand the format
+      this.logger.log(`Sample article dates from API:`);
+      newsResults.slice(0, 3).forEach((article, index) => {
+        this.logger.log(`Article ${index + 1}: "${article.title}" - Date: ${article.date}`);
+      });
 
-      this.logger.log(`Final query used: "${selectedQuery}" - ${newsResults.length} articles returned`);
+      const topHeadline = newsResults[0]?.title || `${companyName} trending news`;
+
+      this.logger.log(`Final query used: "${selectedQuery}" - ${newsResults.length} articles returned after filtering`);
 
       const summary: StockNewsSummary = {
         headline: topHeadline,
-        sentiment,
-        source: 'google_news + claude_ai',
+        source: 'google_news',
       };
 
       return {
@@ -247,49 +314,6 @@ export class NewsService {
 
     // Final fallback to rule-based analysis
     return this.generateBasicOverview(symbol, stockNews, macroNews);
-  }
-
-  async analyzeSentiment(headline: string, articles: SerpApiNewsResult[]): Promise<'positive' | 'neutral' | 'negative'> {
-    try {
-      // Check cache first (6-hour TTL)
-      const cacheKey = `sentiment:${Buffer.from(headline).toString('base64').slice(0, 20)}`;
-      const cached = await this.cacheManager.get<'positive' | 'neutral' | 'negative'>(cacheKey);
-      if (cached) return cached;
-
-      // Build comprehensive sentiment analysis prompt
-      const articlesText = articles.map(article => `${article.title}: ${article.snippet || ''}`).join('\n');
-
-      const sentimentPrompt = `
-Analyze the sentiment of these financial news headlines and content:
-
-Main Headline: ${headline}
-
-Additional Articles:
-${articlesText}
-
-Classify the overall sentiment as positive, neutral, or negative based on:
-- Market impact implications
-- Company performance indicators  
-- Investor sentiment tone
-- Economic implications
-- Risk factors mentioned
-
-Consider the financial context and potential impact on stock price.
-
-Respond with only one word: positive, neutral, or negative
-      `;
-
-      // Try Claude AI first
-      const response = await this.claudeService.generateResponse(sentimentPrompt, 50);
-      const sentiment = this.parseSentimentResponse(response);
-
-      // Cache and return result (6 hours)
-      await this.cacheManager.set(cacheKey, sentiment, 21600000);
-      return sentiment;
-    } catch (error) {
-      // Fallback to keyword-based analysis
-      return this.getKeywordBasedSentiment(headline);
-    }
   }
 
   async healthCheck(): Promise<{
@@ -494,27 +518,6 @@ Generate keyFactors that reflect insights from the complete set of articles with
     };
   }
 
-  private parseSentimentResponse(response: string): 'positive' | 'neutral' | 'negative' {
-    const text = response.toLowerCase().trim();
-    if (text.includes('positive')) return 'positive';
-    if (text.includes('negative')) return 'negative';
-    return 'neutral';
-  }
-
-  private getKeywordBasedSentiment(headline: string): 'positive' | 'neutral' | 'negative' {
-    const text = headline.toLowerCase();
-
-    const positiveWords = ['growth', 'gains', 'surge', 'rally', 'bullish', 'beat', 'strong', 'up', 'rise'];
-    const negativeWords = ['decline', 'fall', 'crash', 'bearish', 'miss', 'weak', 'down', 'loss'];
-
-    const positiveScore = positiveWords.reduce((score, word) => score + (text.includes(word) ? 1 : 0), 0);
-    const negativeScore = negativeWords.reduce((score, word) => score + (text.includes(word) ? 1 : 0), 0);
-
-    if (positiveScore > negativeScore) return 'positive';
-    if (negativeScore > positiveScore) return 'negative';
-    return 'neutral';
-  }
-
   // File system helper methods
   private ensureDirectoryExists(dirPath: string): void {
     if (!fs.existsSync(dirPath)) {
@@ -561,7 +564,6 @@ Generate keyFactors that reflect insights from the complete set of articles with
       query: stockNewsData.query || `${symbol} enhanced search`,
       summary: { 
         headline: stockNewsData.summary.headline, 
-        sentiment: stockNewsData.summary.sentiment,
         source: stockNewsData.summary.source 
       },
       articles: stockNewsData.articles,
@@ -600,7 +602,6 @@ Generate keyFactors that reflect insights from the complete set of articles with
       return {
         summary: {
           headline: data.summary.headline,
-          sentiment: data.summary.sentiment || 'neutral',
           source: data.summary.source
         },
         articles: data.articles || [],
@@ -626,7 +627,8 @@ Generate keyFactors that reflect insights from the complete set of articles with
       ],
       totalArticles: 1,
       source: 'mock_data',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      query: 'stock market economy finance business'
     };
   }
 
@@ -641,7 +643,6 @@ Generate keyFactors that reflect insights from the complete set of articles with
 
     return {
       headline: mockHeadlines[symbol] || `${symbol} company updates`,
-      sentiment: 'neutral',
       source: 'mock_data'
     };
   }

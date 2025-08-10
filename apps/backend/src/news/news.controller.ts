@@ -28,7 +28,6 @@ interface ProcessNewsResponse {
     };
     stockNews?: {
       headline: string;
-      sentiment: 'positive' | 'neutral' | 'negative';
       articles: NewsArticle[];
       query?: string;
       fetchedAt: string;
@@ -43,6 +42,7 @@ interface ProcessNewsResponse {
       articles: NewsArticle[];
       totalArticles: number;
       fetchedAt: string;
+      query?: string;
     };
     validationResult?: {
       isValid: boolean;
@@ -67,7 +67,6 @@ interface NewsResponse {
   };
   stockNews?: {
     headline: string;
-    sentiment: 'positive' | 'neutral' | 'negative';
     articles: NewsArticle[];
     query?: string;
     fetchedAt: string;
@@ -82,6 +81,7 @@ interface NewsResponse {
     articles: NewsArticle[];
     totalArticles: number;
     fetchedAt: string;
+    query?: string;
   };
   validationResult?: {
     isValid: boolean;
@@ -120,7 +120,6 @@ export class NewsController {
 
     return {
       headline: stockNews.headline,
-      sentiment: stockNews.sentiment,
       articles: stockNews.articles,
       query: stockNews.query,
       fetchedAt: currentTime,
@@ -137,7 +136,8 @@ export class NewsController {
       topHeadline: macroNews.topHeadline,
       articles: macroNews.articles,
       totalArticles: macroNews.totalArticles,
-      fetchedAt: currentTime
+      fetchedAt: currentTime,
+      query: macroNews.query || 'stock market economy finance business'
     };
   }
 
