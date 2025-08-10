@@ -34,9 +34,12 @@ npm run dev:web       # Next.js development server with Turbopack
 npm run dev:backend   # NestJS backend (nest start --watch)
 
 # Build commands
-npm run build         # Build all packages and apps
-npm run build:packages # Build shared packages
+npm run build         # Build backend only (production ready)
+npm run start         # Start production backend
+npm run build:packages # Build shared packages (types, utils)
 npm run build:apps    # Build frontend and backend apps
+npm run build:web     # Build Next.js web app only
+npm run build:backend # Build NestJS backend only
 
 # Testing & Quality
 npm run test          # Run tests for all packages and apps
@@ -212,11 +215,13 @@ The project uses npm workspaces with local file: dependencies for maximum develo
 - Framework: Next.js 15.4.5 with App Router
 - Styling: Tailwind CSS 4.x
 - Development: Turbopack for fast development builds
-- React: Version 19.x
+- React: Version 19.1.0
+- Charts: Recharts 3.1.2
 
 **Mobile Frontend (React Native/Expo)**:
 - Framework: Expo ~53.0.20
 - React Native: 0.79.5
+- React: Version 19.0.0
 - Styling: NativeWind (planned)
 - Platform: Cross-platform iOS/Android
 
@@ -229,6 +234,7 @@ The project uses npm workspaces with local file: dependencies for maximum develo
 - Node.js >=18.0.0, npm >=9.0.0
 - Nx workspace for tooling (version 21.3.11)
 - Concurrent development with `concurrently` package
+- TypeScript 5.x for type safety across all packages
 
 ## Current Focus
 
@@ -241,6 +247,21 @@ The backend is complete and ready for frontend development. Priority should be o
 **Full API Testing**: Use `./test_endpoints.sh` to test all backend endpoints with sample requests.
 
 **Mock Data Updates**: Run `npm run update-mock-data` to refresh mock data when needed.
+
+**API Key Testing**: Use `./check-api-keys.sh` to verify API key configuration and connectivity.
+
+## Deployment
+
+**Production Deployment**: The project is configured for Railway deployment with:
+- `railway.json` for Railway-specific configuration
+- `nixpacks.toml` for build configuration
+- `render.yaml` for alternative deployment options
+- Scripts: `railway-deployment-check.sh` and `wait-and-test-railway.sh` for deployment verification
+
+**Environment Configuration**: 
+- Backend uses `.env` file for local development
+- Production uses environment variables through deployment platform
+- All API keys must be configured in production environment
 
 ## Common Troubleshooting
 
