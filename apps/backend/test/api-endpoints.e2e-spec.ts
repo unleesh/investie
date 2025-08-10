@@ -1,39 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { setupTestApp, teardownTestApp } from './setup-e2e';
 
 describe('API Endpoints (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    
-    // Apply same configuration as main.ts
-    app.enableCors({
-      origin: ['http://localhost:3000'],
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
-    });
-    
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      })
-    );
-    
-    await app.init();
+    const testSetup = await setupTestApp();
+    app = testSetup.app;
   });
 
   afterAll(async () => {
-    await app.close();
+    await teardownTestApp();
   });
 
   describe('/api/v1/stocks', () => {
