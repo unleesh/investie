@@ -49,13 +49,15 @@ class ApiClient {
 
   // Stock data endpoints
   async getAllStocks(): Promise<StockCardData[]> {
-    const response = await this.request<ApiResponse<StockCardData[]>>('/api/v1/stocks');
-    return response.data;
+    // Railway backend returns data directly, not wrapped in ApiResponse
+    const response = await this.request<StockCardData[]>('/api/v1/stocks');
+    return response;
   }
 
   async getStock(symbol: StockSymbol): Promise<StockCardData> {
-    const response = await this.request<ApiResponse<StockCardData>>(`/api/v1/stocks/${symbol}`);
-    return response.data;
+    // Railway backend returns data directly, not wrapped in ApiResponse
+    const response = await this.request<StockCardData>(`/api/v1/stocks/${symbol}`);
+    return response;
   }
 
   async getStockChart(symbol: StockSymbol, period: string = '1W'): Promise<ChartData> {
