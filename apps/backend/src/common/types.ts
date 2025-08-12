@@ -50,7 +50,6 @@ export interface StockTechnicals {
 
 export interface StockNewsSummary {
   headline: string;
-  sentiment: 'positive' | 'neutral' | 'negative';
   source: string;
 }
 
@@ -80,9 +79,18 @@ export interface NewsProcessingResult {
   isValid: boolean;
   symbol?: StockSymbol;
   overview?: StockOverview;
+  stockNews?: StockNewsWithArticles;
+  macroNews?: MacroNewsData;
   validationResult?: ValidationResult;
   error?: string;
   suggestions?: string[];
+}
+
+export interface StockNewsWithArticles {
+  headline: string;
+  source: string;
+  articles: SerpApiNewsResult[];
+  query?: string;
 }
 
 export interface ValidationResult {
@@ -111,6 +119,7 @@ export interface MacroNewsData {
   totalArticles: number;
   source: string;
   timestamp: string;
+  query?: string;
 }
 
 export interface SerpApiNewsResult {
