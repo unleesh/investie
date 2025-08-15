@@ -2,9 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Enable experimental features for better performance
-  experimental: {
-    optimizePackageImports: ['react-icons'],
-  },
+  // experimental: {
+  //   optimizePackageImports: ['react-icons'], // Disabled - package not installed
+  // },
   
   // Optimize images
   images: {
@@ -44,8 +44,8 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // Output configuration for Vercel
-  output: 'standalone',
+  // Output configuration - let Vercel handle this automatically
+  // output: 'standalone', // Commented out for Vercel deployment
   
   // Enable strict mode
   reactStrictMode: true,
