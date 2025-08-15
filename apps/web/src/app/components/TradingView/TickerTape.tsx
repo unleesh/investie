@@ -6,6 +6,7 @@ export default function TickerTape() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const container = containerRef.current;
     const script1 = document.createElement('script');
     script1.src = 'https://s3.tradingview.com/external-embedding/embed-widget-tickers.js';
     script1.async = true;
@@ -80,7 +81,7 @@ export default function TickerTape() {
       showSymbolLogo: true
     });
 
-    if (containerRef.current) {
+    if (container) {
       const widget1 = document.createElement('div');
       widget1.className = 'tradingview-widget-container';
       const widgetInner1 = document.createElement('div');
@@ -95,13 +96,13 @@ export default function TickerTape() {
       widget2.appendChild(widgetInner2);
       widget2.appendChild(script2);
 
-      containerRef.current.appendChild(widget1);
-      containerRef.current.appendChild(widget2);
+      container.appendChild(widget1);
+      container.appendChild(widget2);
     }
 
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
   }, []);

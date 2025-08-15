@@ -8,6 +8,7 @@ export default function FundamentalData() {
   const { currentSymbol } = useStock();
 
   useEffect(() => {
+    const container = containerRef.current;
     const script = document.createElement('script');
     script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-financials.js';
     script.async = true;
@@ -21,19 +22,19 @@ export default function FundamentalData() {
       height: "100%"
     });
 
-    if (containerRef.current) {
+    if (container) {
       const widget = document.createElement('div');
       widget.className = 'tradingview-widget-container';
       const widgetInner = document.createElement('div');
       widgetInner.className = 'tradingview-widget-container__widget';
       widget.appendChild(widgetInner);
       widget.appendChild(script);
-      containerRef.current.appendChild(widget);
+      container.appendChild(widget);
     }
 
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
   }, [currentSymbol]);

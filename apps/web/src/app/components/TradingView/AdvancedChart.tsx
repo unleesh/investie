@@ -8,6 +8,7 @@ export default function AdvancedChart() {
   const { currentSymbol } = useStock();
 
   useEffect(() => {
+    const container = containerRef.current;
     const script = document.createElement('script');
     script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
     script.async = true;
@@ -36,7 +37,7 @@ export default function AdvancedChart() {
       autosize: true
     });
 
-    if (containerRef.current) {
+    if (container) {
       const widget = document.createElement('div');
       widget.className = 'tradingview-widget-container';
       widget.style.height = '100%';
@@ -47,12 +48,12 @@ export default function AdvancedChart() {
       widgetInner.style.width = '100%';
       widget.appendChild(widgetInner);
       widget.appendChild(script);
-      containerRef.current.appendChild(widget);
+      container.appendChild(widget);
     }
 
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
   }, [currentSymbol]);
