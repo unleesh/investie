@@ -1,5 +1,33 @@
 # Investie Backend - News Module
 
+## 🚀 Quick Start
+
+**Backend URL**: `http://localhost:3003` (or your configured port)
+
+### Test the New Endpoints:
+```bash
+# Get comprehensive stock analysis with live news data
+curl http://localhost:3003/api/v1/news/AAPL
+
+# Get today's macro market news
+curl http://localhost:3003/api/v1/news/macro/today
+
+# Process any stock symbol
+curl -X POST http://localhost:3003/api/v1/news/process \
+  -H "Content-Type: application/json" \
+  -d '{"symbol": "TSLA"}'
+```
+
+### Requirements:
+- **SERPAPI_API_KEY** configured in `.env` file
+- Backend server running (`npm run start:dev`)
+
+### What the New Endpoints Do:
+- **Fetch live news** from Google News via SerpApi (up to 100 articles per stock)
+- **AI analysis** using Claude API for investment recommendations 
+- **Store data** locally in `data/news/` directory for caching
+- **Return comprehensive analysis** with BUY/HOLD/SELL recommendations and confidence scores
+
 ## Overview
 
 This is the **News Processing Module** for the Investie backend application. It implements a complete sequential workflow for fetching, analyzing, and generating investment insights from news data.
@@ -89,9 +117,67 @@ node test-news-e2e.js
 
 ## 📋 API Usage
 
-### Process Stock News
+The News Service provides three main endpoints for comprehensive stock news analysis:
+
+### 1. Get Stock News Analysis (NEW!)
 ```bash
-POST /news/process
+GET /api/v1/news/{symbol}
+```
+
+**Example:**
+```bash
+curl http://localhost:3003/api/v1/news/AAPL
+```
+
+**Response:**
+```json
+{
+  "symbol": "AAPL",
+  "overview": {
+    "overview": "Apple's strong financial performance, with better-than-expected iPhone sales and revenue growth, coupled with positive market conditions suggest a favorable outlook for AAPL stock.",
+    "recommendation": "BUY",
+    "confidence": 80,
+    "keyFactors": [
+      "Strong iPhone sales and revenue growth",
+      "Positive market conditions and economic indicators",
+      "Trade tension risks and macroeconomic uncertainties"
+    ],
+    "riskLevel": "MEDIUM",
+    "timeHorizon": "3-6 months",
+    "source": "claude_ai_analysis",
+    "timestamp": "2025-08-10T19:31:20.041Z"
+  },
+  "validationResult": {
+    "isValid": true,
+    "method": "known_symbols",
+    "symbol": "AAPL"
+  },
+  "timestamp": "2025-08-10T19:31:20.042Z"
+}
+```
+
+### 2. Get Macro Market News (NEW!)
+```bash
+GET /api/v1/news/macro/today
+```
+
+**Example:**
+```bash
+curl http://localhost:3003/api/v1/news/macro/today
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Macro news processing initiated. Check data directory for results.",
+  "timestamp": "2025-08-10T19:26:36.475Z"
+}
+```
+
+### 3. Process Stock News (Original)
+```bash
+POST /api/v1/news/process
 ```
 
 **Request:**

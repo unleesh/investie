@@ -1,36 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Investie Frontend
 
-## Getting Started
+Modern investment analysis platform built with Next.js 14+ and TradingView widgets.
 
-First, run the development server:
+## 🚀 Features
+
+- **TradingView Integration**: Real-time stock charts, technical analysis, and market data
+- **Responsive Design**: Mobile-first design that works on all devices
+- **Stock Search & Selection**: Interactive search and dropdown for stock selection
+- **Real-time Updates**: Live stock data from backend API
+- **Modern UI**: Clean, professional interface with gradient branding
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 14 with App Router
+- **Styling**: Tailwind CSS + Custom CSS
+- **Language**: TypeScript
+- **State Management**: React Context API
+- **Charts**: TradingView Widgets
+- **API**: REST API integration with NestJS backend
+
+## 📦 Installation
 
 ```bash
+# Install dependencies (from root)
+npm install
+
+# Start development server
+npm run frontend:dev
+
+# Or run directly in this directory
+cd apps/web
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌐 Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create `.env.local` in the `apps/web` directory:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Backend API URL
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
 
-## Learn More
+For production, update to your deployed backend URL:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_API_URL=https://your-backend.railway.app
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Vercel (Recommended)
 
-## Deploy on Vercel
+1. Connect your repository to Vercel
+2. Set the root directory to `apps/web`
+3. Add environment variable `NEXT_PUBLIC_API_URL`
+4. Deploy!
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Manual Build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Build the application
+npm run frontend:build
+
+# Start production server
+npm run frontend:start
+```
+
+## 📱 Responsive Breakpoints
+
+- **Desktop**: 1080px max-width, 2-column grid
+- **Mobile**: < 800px, single column layout
+- **Components**: Adaptive sizing based on viewport
+
+## 🔧 Configuration
+
+### TradingView Widgets
+
+The app includes these TradingView widgets:
+- Ticker Tape (market indices and crypto)
+- Symbol Info (current stock details)
+- Technical Analysis (RSI, moving averages)
+- Advanced Chart (interactive price chart)
+- Company Profile (fundamental data)
+- Financial Data (earnings, metrics)
+- Top Stories (news timeline)
+
+### Stock Symbols
+
+Currently supports these stocks:
+- AAPL, TSLA, MSFT, GOOGL, AMZN
+- NVDA, META, NFLX, AVGO, AMD
+
+## 🔗 API Integration
+
+The frontend connects to the Investie backend API:
+
+- `GET /api/v1/stocks` - All stock data
+- `GET /api/v1/stocks/:symbol` - Individual stock
+- `GET /api/v1/stocks/:symbol/chart` - Chart data
+- `GET /api/v1/market/overview` - Market summary
+
+## 🎨 Styling
+
+- Custom CSS variables for consistent spacing
+- Blue gradient branding (`#00bce5` to `#2962ff`)
+- System font stack for optimal performance
+- Dark/light theme support (TradingView widgets)
+
+## 🧪 Development
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run type checking
+npm run type-check
+
+# Run linting
+npm run lint
+```
+
+## 📁 Project Structure
+
+```
+apps/web/
+├── src/
+│   ├── app/
+│   │   ├── components/       # React components
+│   │   │   ├── TradingView/  # TradingView widgets
+│   │   │   ├── Header.tsx    # Navigation header
+│   │   │   └── Footer.tsx    # Site footer
+│   │   ├── globals.css       # Global styles
+│   │   ├── layout.tsx        # Root layout
+│   │   └── page.tsx          # Home page
+│   ├── lib/
+│   │   └── api.ts           # API client
+│   └── types/
+│       └── api.ts           # TypeScript types
+├── public/                   # Static assets
+├── vercel.json              # Vercel config
+└── package.json
+```

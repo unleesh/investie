@@ -1,137 +1,135 @@
-// Stock validation helper for NewsService
 import axios from 'axios';
+import { Injectable, Logger } from '@nestjs/common';
+import { ValidationResult } from '../common/types';
 
-export interface ValidationResult {
-  isValid: boolean;
-  symbol: string;
-  method: string;
-  reason?: string;
-  error?: string;
-  price?: number;
-}
-
+@Injectable()
 export class StockValidatorHelper {
+  private readonly logger = new Logger(StockValidatorHelper.name);
+  
   private knownValidSymbols = new Set([
     // Major US Stocks
     'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NVDA', 'AMD', 'INTC',
     'NFLX', 'UBER', 'LYFT', 'SNAP', 'TWTR', 'SHOP', 'PYPL', 'SQ', 'ZOOM', 'CRM',
-    'ORCL', 'IBM', 'CSCO', 'ADBE', 'NOW', 'WDAY', 'OKTA', 'ZM', 'DOCU', 'PLTR',
-    'COIN', 'HOOD', 'RBLX', 'U', 'DDOG', 'CRWD', 'ZS', 'SNOW', 'MDB', 'TEAM',
-    
-    // Traditional Stocks
-    'JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'V', 'MA', 'AXP', 'COF',
-    'JNJ', 'PFE', 'UNH', 'ABBV', 'BMY', 'MRK', 'GILD', 'AMGN', 'CVS', 'WBA',
-    'XOM', 'CVX', 'COP', 'SLB', 'EOG', 'MPC', 'VLO', 'PSX', 'OXY', 'KMI',
-    'KO', 'PEP', 'WMT', 'TGT', 'HD', 'LOW', 'MCD', 'SBUX', 'NKE', 'DIS',
-    
-    // ETFs
-    'SPY', 'QQQ', 'IWM', 'VTI', 'VOO', 'IVV', 'VEA', 'VWO', 'AGG', 'BND'
+    'ORCL', 'IBM', 'CSCO', 'V', 'MA', 'JPM', 'BAC', 'WFC', 'GS', 'MS',
+    'JNJ', 'PFE', 'MRNA', 'ABBV', 'UNH', 'CVS', 'WMT', 'TGT', 'COST', 'HD',
+    'KO', 'PEP', 'MCD', 'SBUX', 'NKE', 'DIS', 'CMCSA', 'VZ', 'T', 'TMUS',
+    // Tech giants
+    'AVGO', 'QCOM', 'TXN', 'ADBE', 'NOW', 'INTU', 'MU', 'LRCX', 'KLAC', 'AMAT',
+    // Popular ETFs
+    'SPY', 'QQQ', 'IWM', 'VTI', 'VOO', 'VEA', 'VWO', 'BND', 'VXUS', 'VTEB',
+    // Recent popular stocks
+    'PLTR', 'COIN', 'RBLX', 'HOOD', 'SOFI', 'RIVN', 'LCID', 'AI', 'SMCI', 'ARM'
   ]);
 
-  // Check against known valid symbols (fastest)
-  isKnownValidSymbol(symbol: string): ValidationResult {
-    const upperSymbol = symbol.toUpperCase().trim();
-    return {
-      isValid: this.knownValidSymbols.has(upperSymbol),
-      method: 'known_symbols',
-      symbol: upperSymbol,
-      reason: this.knownValidSymbols.has(upperSymbol) ? 'Found in known symbols' : 'Not in known symbols'
-    };
-  }
-
-  // Basic format validation
-  hasValidFormat(symbol: string): ValidationResult {
-    const upperSymbol = symbol.toUpperCase().trim();
-    const isValidFormat = /^[A-Z]{1,5}(\.[A-Z]{1,2})?$/.test(upperSymbol);
-    
-    return {
-      isValid: isValidFormat,
-      method: 'format_check',
-      symbol: upperSymbol,
-      reason: isValidFormat ? 'Valid format' : 'Invalid format (must be 1-5 letters)'
-    };
-  }
-
-  // Yahoo Finance API validation (free, no key needed)
-  async validateWithYahooFinance(symbol: string): Promise<ValidationResult> {
-    try {
-      const upperSymbol = symbol.toUpperCase().trim();
-      
-      const response = await axios.get(
-        `https://query1.finance.yahoo.com/v8/finance/chart/${upperSymbol}`,
-        {
-          timeout: 8000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        }
-      );
-
-      const chart = response.data.chart;
-      const isValid = chart && chart.result && chart.result.length > 0 && 
-                     !chart.result[0].meta.error;
-      
-      if (isValid) {
-        const meta = chart.result[0].meta;
-        return {
-          isValid: true,
-          method: 'yahoo_finance_api',
-          symbol: upperSymbol,
-          reason: 'Found market data',
-          price: meta.regularMarketPrice
-        };
-      }
-      
-      return {
-        isValid: false,
-        method: 'yahoo_finance_api',
-        symbol: upperSymbol,
-        reason: 'No market data found'
-      };
-      
-    } catch (error) {
-      return {
-        isValid: false,
-        method: 'yahoo_finance_api',
-        symbol: symbol.toUpperCase(),
-        error: axios.isAxiosError(error) && error.response?.status === 404 
-          ? 'Symbol not found' 
-          : (error as Error).message
-      };
-    }
-  }
-
-  // Comprehensive validation (multi-tier)
   async validateSymbol(symbol: string): Promise<ValidationResult> {
-    // Step 1: Format check
+    // Tier 1: Format validation (instant)
     const formatResult = this.hasValidFormat(symbol);
     if (!formatResult.isValid) {
       return formatResult;
     }
 
-    // Step 2: Known symbols (fastest)
+    // Tier 2: Known symbols lookup (milliseconds)
     const knownResult = this.isKnownValidSymbol(symbol);
     if (knownResult.isValid) {
       return knownResult;
     }
 
-    // Step 3: API validation
-    const apiResult = await this.validateWithYahooFinance(symbol);
-    return apiResult;
+    // Tier 3: Yahoo Finance API validation (seconds)
+    return await this.validateWithYahooFinance(symbol);
   }
 
-  // Get suggestions for invalid symbols
-  getSuggestions(invalidSymbol: string): string[] {
-    const upper = invalidSymbol.toUpperCase();
-    const suggestions: string[] = [];
+  private hasValidFormat(symbol: string): ValidationResult {
+    const cleanSymbol = symbol.trim().toUpperCase();
     
+    // Basic format validation
+    if (!cleanSymbol) {
+      return {
+        isValid: false,
+        method: 'format_validation',
+        symbol: cleanSymbol,
+        reason: 'Symbol cannot be empty',
+      };
+    }
+
+    // Check for valid symbol format (1-5 letters, no numbers or special characters)
+    if (!/^[A-Z]{1,5}$/.test(cleanSymbol)) {
+      return {
+        isValid: false,
+        method: 'format_validation',
+        symbol: cleanSymbol,
+        reason: 'Symbol must be 1-5 letters only',
+      };
+    }
+
+    return {
+      isValid: true,
+      method: 'format_validation',
+      symbol: cleanSymbol,
+      reason: 'Valid format',
+    };
+  }
+
+  private isKnownValidSymbol(symbol: string): ValidationResult {
+    const upperSymbol = symbol.toUpperCase();
+    const isKnown = this.knownValidSymbols.has(upperSymbol);
+
+    return {
+      isValid: isKnown,
+      method: 'known_symbols_lookup',
+      symbol: upperSymbol,
+      reason: isKnown ? 'Found in known symbols' : 'Not in known symbols list',
+    };
+  }
+
+  async validateWithYahooFinance(symbol: string): Promise<ValidationResult> {
+    try {
+      const response = await axios.get(
+        `https://query1.finance.yahoo.com/v8/finance/chart/${symbol.toUpperCase()}`,
+        {
+          timeout: 8000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        }
+      );
+
+      const chart = response.data.chart;
+      const isValid = chart?.result?.[0] && !chart.result[0].meta.error;
+
+      return {
+        isValid,
+        method: 'yahoo_finance_api',
+        symbol: symbol.toUpperCase(),
+        reason: isValid ? 'Found market data' : 'No market data found',
+        price: isValid ? chart.result[0].meta.regularMarketPrice : undefined
+      };
+    } catch (error) {
+      this.logger.warn(`Yahoo Finance validation failed for ${symbol}: ${error.message}`);
+      return {
+        isValid: false,
+        method: 'yahoo_finance_api',
+        symbol: symbol.toUpperCase(),
+        reason: 'API validation failed',
+      };
+    }
+  }
+
+  getSuggestions(invalidSymbol: string): string[] {
+    const suggestions: string[] = [];
+    const upperSymbol = invalidSymbol.toUpperCase();
+
     for (const validSymbol of this.knownValidSymbols) {
-      if (validSymbol.includes(upper) || upper.includes(validSymbol)) {
+      if (validSymbol.includes(upperSymbol) || upperSymbol.includes(validSymbol)) {
         suggestions.push(validSymbol);
       }
       if (suggestions.length >= 5) break;
     }
-    
+
+    // If no partial matches found, suggest popular symbols
+    if (suggestions.length === 0) {
+      suggestions.push('AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN');
+    }
+
     return suggestions;
   }
 }
